@@ -125,7 +125,8 @@ benchmarks/results/*.tmp
 # -- Claude Code local state -----------------------------------------------
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
-.claude/memory/  # symlinked per-machine via tools/setup-memory-link.sh
+# .claude/memory/ is symlinked per-machine via tools/setup-memory-link.sh
+.claude/memory/
 
 # -- QMD daemon local files ------------------------------------------------
 .qmd-local/

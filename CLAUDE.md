@@ -161,7 +161,7 @@ For everything else: act, then report.
 - **Spec-driven apps.** The NSP app is built from `specs/nsp-app/`, locked before impl. Divergence → amend spec, then code.
 - **Latest modern defaults.** JDK 25 (LTS), Kotlin 2.1+, Gradle 9, Python 3.12+ via uv, Node 22+. Upgrade on schedule, don't linger on older versions.
 - **MiniZinc as teaching tool.** Used during learning phases; not in the production app unless a concrete case proves value.
-- **Public-ish repo, private by default.** Repo is private on GitHub. Don't leak personal details. Fine to share code snippets publicly later with permission.
+- **Public repo, personal-framing kept discreet.** Repo is public on GitHub. Technical content is fully public; treat personal memories under `.claude/memory/` (git-ignored, per-machine) as private.
 - **No hallucinated APIs.** If uncertain about a CP-SAT, `cpsat-kt`, or MiniZinc API, grep the source or ask — never guess.
 
 ## Commit conventions
