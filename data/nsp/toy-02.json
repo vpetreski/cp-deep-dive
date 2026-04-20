@@ -1,18 +1,21 @@
 {
+  "id": "toy-02",
+  "name": "Toy 02 — 5 nurses, 14 days, 3 shifts",
+  "source": "toy",
   "horizonDays": 14,
   "shifts": [
-    {"id": "M", "name": "Morning", "start": "07:00", "end": "15:00"},
-    {"id": "D", "name": "Day",     "start": "15:00", "end": "23:00"},
-    {"id": "N", "name": "Night",   "start": "23:00", "end": "07:00"}
+    {"id": "M", "label": "Morning", "start": "07:00", "end": "15:00", "startMinutes": 420,  "durationMinutes": 480, "isNight": false},
+    {"id": "D", "label": "Day",     "start": "15:00", "end": "23:00", "startMinutes": 900,  "durationMinutes": 480, "isNight": false},
+    {"id": "N", "label": "Night",   "start": "23:00", "end": "07:00", "startMinutes": 1380, "durationMinutes": 480, "isNight": true}
   ],
   "nurses": [
-    {"id": "N1", "name": "Alice",  "skills": ["general"],                      "contractHoursPerWeek": 36},
-    {"id": "N2", "name": "Bob",    "skills": ["general", "icu"],               "contractHoursPerWeek": 36},
-    {"id": "N3", "name": "Carmen", "skills": ["general", "pedi"],              "contractHoursPerWeek": 36},
-    {"id": "N4", "name": "Diego",  "skills": ["general"],                      "contractHoursPerWeek": 30},
-    {"id": "N5", "name": "Elif",   "skills": ["general", "icu", "senior"],     "contractHoursPerWeek": 40}
+    {"id": "N1", "name": "Alice",  "skills": ["general"],                  "contractHoursPerWeek": 36, "unavailable": []},
+    {"id": "N2", "name": "Bob",    "skills": ["general", "icu"],           "contractHoursPerWeek": 36, "unavailable": []},
+    {"id": "N3", "name": "Carmen", "skills": ["general", "pedi"],          "contractHoursPerWeek": 36, "unavailable": [10]},
+    {"id": "N4", "name": "Diego",  "skills": ["general"],                  "contractHoursPerWeek": 30, "unavailable": [6]},
+    {"id": "N5", "name": "Elif",   "skills": ["general", "icu", "senior"], "contractHoursPerWeek": 40, "unavailable": []}
   ],
-  "demand": [
+  "coverage": [
     {"day": 0,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
     {"day": 0,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
     {"day": 0,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
@@ -56,6 +59,16 @@
     {"day": 13, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
     {"day": 13, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []}
   ],
+  "preferences": [
+    {"nurseId": "N1", "day": 5,  "shiftId": null, "kind": "prefer", "weight": 2},
+    {"nurseId": "N1", "day": 6,  "shiftId": null, "kind": "prefer", "weight": 2},
+    {"nurseId": "N1", "day": 12, "shiftId": null, "kind": "prefer", "weight": 2},
+    {"nurseId": "N1", "day": 13, "shiftId": null, "kind": "prefer", "weight": 2},
+    {"nurseId": "N2", "day": 2,  "shiftId": "M",  "kind": "prefer", "weight": 1},
+    {"nurseId": "N3", "day": 4,  "shiftId": "N",  "kind": "avoid",  "weight": 5},
+    {"nurseId": "N4", "day": 0,  "shiftId": "M",  "kind": "prefer", "weight": 3},
+    {"nurseId": "N5", "day": 7,  "shiftId": null, "kind": "prefer", "weight": 2}
+  ],
   "forbiddenTransitions": [
     ["N", "M"],
     ["N", "D"],
@@ -63,18 +76,8 @@
   ],
   "minRestHours": 11,
   "maxConsecutiveWorkingDays": 5,
-  "preferences": [
-    {"nurseId": "N1", "day": 5,  "shiftId": null, "weight": 2},
-    {"nurseId": "N1", "day": 6,  "shiftId": null, "weight": 2},
-    {"nurseId": "N1", "day": 12, "shiftId": null, "weight": 2},
-    {"nurseId": "N1", "day": 13, "shiftId": null, "weight": 2},
-    {"nurseId": "N2", "day": 2,  "shiftId": "M",  "weight": 1},
-    {"nurseId": "N3", "day": 4,  "shiftId": "N",  "weight": -5},
-    {"nurseId": "N4", "day": 0,  "shiftId": "M",  "weight": 3},
-    {"nurseId": "N5", "day": 7,  "shiftId": null, "weight": 2}
-  ],
-  "fixedOff": [
-    {"nurseId": "N4", "day": 6},
-    {"nurseId": "N3", "day": 10}
-  ]
+  "maxConsecutiveNights": 3,
+  "metadata": {
+    "contractTolerance": 16
+  }
 }

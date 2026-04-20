@@ -10,6 +10,11 @@
     "instance": {
       "$ref": "nsp-instance.schema.json"
     },
+    "instanceId": {
+      "type": "string",
+      "description": "Alternative to 'instance': reference a previously-uploaded instance by id.",
+      "minLength": 1
+    },
     "params": {
       "$ref": "#/$defs/SolverParams"
     }
@@ -22,12 +27,26 @@
         "maxTimeSeconds": {
           "type": "number",
           "description": "Soft wall-clock budget for the solve in seconds.",
-          "exclusiveMinimum": 0
+          "exclusiveMinimum": 0,
+          "maximum": 3600
+        },
+        "timeLimitSeconds": {
+          "type": "number",
+          "description": "Alias for maxTimeSeconds.",
+          "exclusiveMinimum": 0,
+          "maximum": 3600
         },
         "numSearchWorkers": {
           "type": "integer",
           "description": "CP-SAT workers (maps to num_search_workers).",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 64
+        },
+        "numWorkers": {
+          "type": "integer",
+          "description": "Alias for numSearchWorkers.",
+          "minimum": 0,
+          "maximum": 64
         },
         "randomSeed": {
           "type": "integer",
@@ -39,10 +58,35 @@
           "minimum": 0,
           "maximum": 2
         },
+        "relativeGapLimit": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "logSearchProgress": {
+          "type": "boolean"
+        },
         "enableHints": {
-          "type": "boolean",
-          "description": "Whether to pass any provided solution hints to CP-SAT."
-        }
+          "type": "boolean"
+        },
+        "objectiveWeights": { "$ref": "#/$defs/ObjectiveWeights" }
+      }
+    },
+    "ObjectiveWeights": {
+      "type": "object",
+      "description": "Per-soft-constraint weight overrides. Each key must be a non-negative integer in [0, 1000]. Keys not present fall back to spec defaults.",
+      "additionalProperties": false,
+      "properties": {
+        "preference":          { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "fairness":            { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "workloadBalance":     { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "weekendDistribution": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "consecutiveDaysOff":  { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "SC1":                 { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "SC2":                 { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "SC3":                 { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "SC4":                 { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "SC5":                 { "type": "integer", "minimum": 0, "maximum": 1000 }
       }
     }
   }

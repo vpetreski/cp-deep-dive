@@ -1,15 +1,18 @@
 {
+  "id": "toy-01",
+  "name": "Toy 01 — 3 nurses, 7 days, 2 shifts",
+  "source": "toy",
   "horizonDays": 7,
   "shifts": [
-    {"id": "D", "name": "Day",   "start": "07:00", "end": "19:00"},
-    {"id": "N", "name": "Night", "start": "19:00", "end": "07:00"}
+    {"id": "D", "label": "Day",   "start": "07:00", "end": "19:00", "startMinutes": 420,  "durationMinutes": 720, "isNight": false},
+    {"id": "N", "label": "Night", "start": "19:00", "end": "07:00", "startMinutes": 1140, "durationMinutes": 720, "isNight": true}
   ],
   "nurses": [
-    {"id": "N1", "name": "Alice",  "skills": ["general"],            "contractHoursPerWeek": 36},
-    {"id": "N2", "name": "Bob",    "skills": ["general"],            "contractHoursPerWeek": 36},
-    {"id": "N3", "name": "Carmen", "skills": ["general", "pedi"],    "contractHoursPerWeek": 36}
+    {"id": "N1", "name": "Alice",  "skills": ["general"],         "contractHoursPerWeek": 36, "unavailable": []},
+    {"id": "N2", "name": "Bob",    "skills": ["general"],         "contractHoursPerWeek": 36, "unavailable": []},
+    {"id": "N3", "name": "Carmen", "skills": ["general", "pedi"], "contractHoursPerWeek": 36, "unavailable": [3]}
   ],
-  "demand": [
+  "coverage": [
     {"day": 0, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
     {"day": 0, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
     {"day": 1, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
@@ -25,16 +28,17 @@
     {"day": 6, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
     {"day": 6, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []}
   ],
+  "preferences": [
+    {"nurseId": "N1", "day": 6, "shiftId": null, "kind": "prefer", "weight": 3},
+    {"nurseId": "N2", "day": 5, "shiftId": null, "kind": "prefer", "weight": 2}
+  ],
   "forbiddenTransitions": [
     ["N", "D"]
   ],
   "minRestHours": 11,
   "maxConsecutiveWorkingDays": 5,
-  "preferences": [
-    {"nurseId": "N1", "day": 6, "shiftId": null, "weight": 3},
-    {"nurseId": "N2", "day": 5, "shiftId": null, "weight": 2}
-  ],
-  "fixedOff": [
-    {"nurseId": "N3", "day": 3}
-  ]
+  "maxConsecutiveNights": 3,
+  "metadata": {
+    "contractTolerance": 24
+  }
 }

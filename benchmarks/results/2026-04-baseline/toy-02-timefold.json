@@ -1,0 +1,17 @@
+{
+    "timestamp": "2026-04-20T04:15:52.128628Z",
+    "instanceId": "toy-02",
+    "solver": "timefold",
+    "status": "feasible",
+    "objective": 1.0,
+    "bound": null,
+    "gap": null,
+    "solveSeconds": 15.006,
+    "wallSeconds": 17.93,
+    "trajectory": [
+        {
+            "tSeconds": 15.006,
+            "objective": 1.0
+        }
+    ]
+}

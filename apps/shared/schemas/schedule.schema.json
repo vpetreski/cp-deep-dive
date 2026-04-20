@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cp-deep-dive.dev/schemas/schedule.schema.json",
   "title": "Schedule",
-  "description": "A candidate roster: one assignment row per (nurseId, day). Absence of a row (or shiftId = null) means the nurse has the day off.",
+  "description": "A candidate roster: one assignment per (nurseId, day). Absence of a row (or shiftId = null) means the nurse has the day off.",
   "type": "object",
   "required": ["instanceId", "assignments"],
   "additionalProperties": false,
@@ -10,6 +10,11 @@
     "instanceId": {
       "type": "string",
       "description": "Identifier of the NspInstance this schedule was produced for.",
+      "minLength": 1
+    },
+    "jobId": {
+      "type": "string",
+      "description": "Identifier of the SolveJob that produced this schedule.",
       "minLength": 1
     },
     "generatedAt": {
@@ -23,7 +28,7 @@
     },
     "violations": {
       "type": "array",
-      "description": "Soft-constraint violations detected by the validator, if any.",
+      "description": "Hard (severity='hard') or soft (severity='soft') constraint violations.",
       "items": { "$ref": "#/$defs/Violation" }
     }
   },
@@ -57,7 +62,7 @@
       "properties": {
         "code": {
           "type": "string",
-          "description": "Stable violation code (e.g. 'HC-1', 'SC-2')."
+          "description": "Stable violation code (HC-1..HC-8, SC-1..SC-5)."
         },
         "message": {
           "type": "string"

@@ -1,23 +1,25 @@
 openapi: 3.1.0
 info:
   title: cp-deep-dive NSP API
-  version: 0.1.0
-  summary: Nurse Scheduling Problem service contract.
+  version: 1.0.0
+  summary: Nurse Scheduling Problem service contract (locked spec v1.0).
   description: |
     Shared contract implemented identically by `apps/py-api/` (FastAPI) and
-    `apps/kt-api/` (Ktor 3). This is a stub — the full contract is finalized in
-    Chapter 14 (`specs/nsp-app/`) and locked before Phase 7 implementation.
+    `apps/kt-api/` (Ktor 3). The spec at `specs/nsp-app/06-api-contract.md`
+    is the prose source of truth; this OpenAPI document wins on shape.
   license:
     name: Apache-2.0
     identifier: Apache-2.0
 servers:
   - url: http://localhost:8000
-    description: Python (FastAPI) backend — default Phase 7 dev port.
+    description: Python (FastAPI) backend — default dev port.
   - url: http://localhost:8080
-    description: Kotlin (Ktor 3) backend — default Phase 7 dev port.
+    description: Kotlin (Ktor 3) backend — default dev port.
 tags:
   - name: meta
-    description: Service health + version.
+    description: Service health, version, OpenAPI document, Prometheus metrics.
+  - name: instances
+    description: Upload, list, fetch, delete NSP instances.
   - name: solve
     description: Submit and retrieve NSP solves.
 
@@ -34,15 +36,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
-              examples:
-                python:
-                  value:
-                    status: ok
-                    service: py-api
-                kotlin:
-                  value:
-                    status: ok
-                    service: kt-api
+        "503":
+          description: Process cannot serve traffic.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /version:
     get:
@@ -57,11 +56,162 @@ paths:
               schema:
                 $ref: "#/components/schemas/VersionResponse"
 
+  /openapi.yaml:
+    get:
+      tags: [meta]
+      summary: Serve the checked-in OpenAPI document byte-identically.
+      operationId: getOpenApi
+      responses:
+        "200":
+          description: OpenAPI 3.1 document in YAML form.
+          content:
+            application/yaml:
+              schema:
+                type: string
+
+  /metrics:
+    get:
+      tags: [meta]
+      summary: Prometheus text-format metrics.
+      operationId: getMetrics
+      responses:
+        "200":
+          description: Text exposition format.
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /instances:
+    post:
+      tags: [instances]
+      summary: Upload a new NSP instance.
+      operationId: postInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NspInstance"
+      responses:
+        "201":
+          description: Instance created.
+          headers:
+            Location:
+              description: URL for the created instance.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NspInstance"
+        "400":
+          description: Malformed request body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "413":
+          description: Payload too large.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Schema-valid but semantically invalid instance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      tags: [instances]
+      summary: List instances with cursor pagination.
+      operationId: listInstances
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: cursor
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Page of instance summaries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstanceList"
+        "400":
+          description: Invalid cursor or limit.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /instances/{id}:
+    get:
+      tags: [instances]
+      summary: Fetch a single instance by id.
+      operationId: getInstance
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Instance found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NspInstance"
+        "404":
+          description: No such instance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags: [instances]
+      summary: Delete an instance and its solve jobs.
+      operationId: deleteInstance
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted (or already absent).
+        "404":
+          description: No such instance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /solve:
     post:
       tags: [solve]
       summary: Submit an instance for solving.
       operationId: postSolve
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          description: Optional idempotency key; identical body + key within 24h returns the original jobId.
+          schema:
+            type: string
+            maxLength: 128
       requestBody:
         required: true
         content:
@@ -70,13 +220,42 @@ paths:
               $ref: "#/components/schemas/SolveRequest"
       responses:
         "202":
-          description: Job accepted; poll /solution/{jobId} or subscribe to /solutions/{jobId}/stream.
+          description: Job accepted.
+          headers:
+            Location:
+              description: URL to poll for the solution.
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SolveAccepted"
         "400":
-          description: Invalid instance or parameters.
+          description: Malformed request body.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Idempotency-Key conflict (same key, different body).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "413":
+          description: Payload too large.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Schema-valid but semantically invalid.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "503":
+          description: Solver pool full.
           content:
             application/json:
               schema:
@@ -85,7 +264,7 @@ paths:
   /solution/{jobId}:
     get:
       tags: [solve]
-      summary: Fetch the latest solution for a job.
+      summary: Fetch the latest (partial or final) solution for a job.
       operationId: getSolution
       parameters:
         - in: path
@@ -95,7 +274,7 @@ paths:
             type: string
       responses:
         "200":
-          description: Solution payload (may be partial for running jobs).
+          description: Current state of the job.
           content:
             application/json:
               schema:
@@ -112,9 +291,8 @@ paths:
       tags: [solve]
       summary: Server-Sent Events stream of incremental solutions.
       description: |
-        Emits `Solution` events with the current best schedule, objective, and
-        bound. Terminates when the solve finishes (optimal, infeasible, or timed
-        out). Events use the `text/event-stream` Content-Type.
+        Emits `solution` events with `SolveResponse` JSON payloads. Stream closes
+        when the job reaches a terminal status or the 10,000-event cap is hit.
       operationId: streamSolutions
       parameters:
         - in: path
@@ -130,8 +308,64 @@ paths:
               schema:
                 type: string
                 description: |
-                  Each event is a JSON-encoded `SolveResponse` payload, prefixed
-                  by `event: solution\ndata: ...`.
+                  Each event is a JSON-encoded `SolveResponse`, framed as
+                  `event: solution\ndata: <json>\n\n`.
+        "404":
+          description: No such job.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /solve/{jobId}/cancel:
+    post:
+      tags: [solve]
+      summary: Request cancellation of a running solve.
+      operationId: cancelSolve
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "202":
+          description: Cancellation accepted; response reflects current state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolveResponse"
+        "404":
+          description: No such job.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Job is already in a terminal state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /solve/{jobId}/log:
+    get:
+      tags: [solve]
+      summary: Retrieve the CP-SAT search log for a job.
+      operationId: getSolveLog
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Plain-text search log (may be empty for jobs still in pending).
+          content:
+            text/plain:
+              schema:
+                type: string
         "404":
           description: No such job.
           content:
@@ -151,6 +385,9 @@ components:
         service:
           type: string
           description: Short service identifier ('py-api' or 'kt-api').
+        checks:
+          type: object
+          additionalProperties: true
 
     VersionResponse:
       type: object
@@ -164,27 +401,77 @@ components:
           description: OR-Tools CP-SAT version in use.
         runtime:
           type: string
-          description: Runtime identifier (e.g. 'python 3.12.7', 'openjdk 25').
+          description: Runtime identifier (e.g. 'python 3.12.7').
+        service:
+          type: string
 
     SolveAccepted:
       type: object
-      required: [jobId]
+      required: [jobId, status]
       properties:
         jobId:
           type: string
           minLength: 1
+        status:
+          type: string
+          enum: [pending, queued, running]
+        instanceId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
 
     Error:
       type: object
-      required: [message]
+      required: [code, message]
       properties:
         code:
           type: string
+          description: Canonical error code; see specs/nsp-app/06-api-contract.md.
         message:
           type: string
         details:
           type: object
           additionalProperties: true
+
+    InstanceList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstanceSummary"
+        nextCursor:
+          type: string
+          description: Omitted when no more pages.
+
+    InstanceSummary:
+      type: object
+      required: [id, horizonDays, nurseCount, shiftCount]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        source:
+          type: string
+          enum: [toy, nsplib, inrc1, inrc2, custom]
+        horizonDays:
+          type: integer
+          minimum: 1
+        nurseCount:
+          type: integer
+          minimum: 1
+        shiftCount:
+          type: integer
+          minimum: 1
+        coverageSlotCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
 
     SolverParams:
       type: object
@@ -192,9 +479,19 @@ components:
         maxTimeSeconds:
           type: number
           exclusiveMinimum: 0
+          maximum: 3600
+        timeLimitSeconds:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 3600
         numSearchWorkers:
           type: integer
           minimum: 0
+          maximum: 64
+        numWorkers:
+          type: integer
+          minimum: 0
+          maximum: 64
         randomSeed:
           type: integer
           minimum: 0
@@ -202,12 +499,65 @@ components:
           type: integer
           minimum: 0
           maximum: 2
+        relativeGapLimit:
+          type: number
+          minimum: 0
+          maximum: 1
+        logSearchProgress:
+          type: boolean
         enableHints:
           type: boolean
+        objectiveWeights:
+          $ref: "#/components/schemas/ObjectiveWeights"
+
+    ObjectiveWeights:
+      type: object
+      description: Per-soft-constraint weight overrides (0..1000).
+      properties:
+        preference:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        fairness:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        workloadBalance:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        weekendDistribution:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        consecutiveDaysOff:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        SC1:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        SC2:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        SC3:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        SC4:
+          type: integer
+          minimum: 0
+          maximum: 1000
+        SC5:
+          type: integer
+          minimum: 0
+          maximum: 1000
 
     NspInstance:
       type: object
-      required: [id, horizonDays, shifts, nurses, coverage]
+      required: [horizonDays, shifts, nurses, coverage]
       properties:
         id:
           type: string
@@ -220,20 +570,27 @@ components:
         horizonDays:
           type: integer
           minimum: 1
+          maximum: 90
         shifts:
           type: array
           minItems: 1
+          maxItems: 20
           items:
             $ref: "#/components/schemas/Shift"
         nurses:
           type: array
           minItems: 1
+          maxItems: 200
           items:
             $ref: "#/components/schemas/Nurse"
         coverage:
           type: array
           items:
             $ref: "#/components/schemas/CoverageRequirement"
+        preferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/Preference"
         forbiddenTransitions:
           type: array
           items:
@@ -242,6 +599,18 @@ components:
             maxItems: 2
             items:
               type: string
+        minRestHours:
+          type: integer
+          minimum: 0
+          default: 11
+        maxConsecutiveWorkingDays:
+          type: integer
+          minimum: 1
+          default: 6
+        maxConsecutiveNights:
+          type: integer
+          minimum: 1
+          default: 3
         metadata:
           type: object
           additionalProperties: true
@@ -255,6 +624,13 @@ components:
           minLength: 1
         label:
           type: string
+          minLength: 1
+        start:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+        end:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
         startMinutes:
           type: integer
           minimum: 0
@@ -262,6 +638,8 @@ components:
         durationMinutes:
           type: integer
           minimum: 1
+        isNight:
+          type: boolean
         skill:
           type: string
 
@@ -279,6 +657,10 @@ components:
           items:
             type: string
           uniqueItems: true
+        contractHoursPerWeek:
+          type: integer
+          minimum: 0
+          maximum: 80
         maxShiftsPerWeek:
           type: integer
           minimum: 0
@@ -288,10 +670,6 @@ components:
         maxConsecutiveWorkingDays:
           type: integer
           minimum: 1
-        preferences:
-          type: array
-          items:
-            $ref: "#/components/schemas/Preference"
         unavailable:
           type: array
           items:
@@ -301,7 +679,7 @@ components:
 
     CoverageRequirement:
       type: object
-      required: [day, shiftId, required]
+      required: [day, shiftId]
       properties:
         day:
           type: integer
@@ -309,24 +687,45 @@ components:
         shiftId:
           type: string
           minLength: 1
+        min:
+          type: integer
+          minimum: 0
+        max:
+          type: integer
+          minimum: 0
         required:
           type: integer
           minimum: 0
+        requiredSkills:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
         skill:
           type: string
 
     Preference:
       type: object
-      required: [day, shiftId, weight]
+      required: [nurseId, kind, weight]
       properties:
+        nurseId:
+          type: string
+          minLength: 1
         day:
           type: integer
           minimum: 0
         shiftId:
+          oneOf:
+            - type: string
+              minLength: 1
+            - type: "null"
+        kind:
           type: string
-          minLength: 1
+          enum: [prefer, avoid]
         weight:
           type: integer
+          minimum: 1
+          maximum: 10
 
     SolveRequest:
       type: object
@@ -334,6 +733,8 @@ components:
       properties:
         instance:
           $ref: "#/components/schemas/NspInstance"
+        instanceId:
+          type: string
         params:
           $ref: "#/components/schemas/SolverParams"
 
@@ -342,6 +743,9 @@ components:
       required: [instanceId, assignments]
       properties:
         instanceId:
+          type: string
+          minLength: 1
+        jobId:
           type: string
           minLength: 1
         generatedAt:
@@ -398,19 +802,29 @@ components:
         jobId:
           type: string
           minLength: 1
+        instanceId:
+          type: string
+          minLength: 1
         status:
           type: string
           enum:
             - pending
+            - queued
             - running
             - feasible
             - optimal
             - infeasible
             - unknown
+            - timeout
+            - cancelled
             - modelInvalid
             - error
         schedule:
           $ref: "#/components/schemas/Schedule"
+        violations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Violation"
         objective:
           type: number
         bestBound:
@@ -420,5 +834,14 @@ components:
         solveTimeSeconds:
           type: number
           minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
         error:
           type: string

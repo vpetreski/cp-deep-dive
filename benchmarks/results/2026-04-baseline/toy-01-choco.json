@@ -1,0 +1,17 @@
+{
+    "timestamp": "2026-04-20T04:15:48.802760Z",
+    "instanceId": "toy-01",
+    "solver": "choco",
+    "status": "optimal",
+    "objective": 0.0,
+    "bound": null,
+    "gap": null,
+    "solveSeconds": 0.017,
+    "wallSeconds": 2.787,
+    "trajectory": [
+        {
+            "tSeconds": 0.017,
+            "objective": 0.0
+        }
+    ]
+}

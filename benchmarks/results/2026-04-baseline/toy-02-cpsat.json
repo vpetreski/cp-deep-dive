@@ -1,0 +1,17 @@
+{
+    "timestamp": "2026-04-20T04:15:51.593667Z",
+    "instanceId": "toy-02",
+    "solver": "cpsat",
+    "status": "optimal",
+    "objective": 20.0,
+    "bound": 20.0,
+    "gap": 0.0,
+    "solveSeconds": 0.22473600000000002,
+    "wallSeconds": 0.531,
+    "trajectory": [
+        {
+            "tSeconds": 0.22473600000000002,
+            "objective": 20.0
+        }
+    ]
+}

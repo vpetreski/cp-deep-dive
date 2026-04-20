@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://cp-deep-dive.dev/schemas/nsp-instance.schema.json",
   "title": "NspInstance",
-  "description": "A single Nurse Scheduling Problem instance. Stable across toy and benchmark sources; aligned with the in-repo toy schema at data/nsp/schema.json.",
+  "description": "A single Nurse Scheduling Problem instance. Canonical wire format for the NSP app (specs/nsp-app/03-domain-model.md). Aligned with the teaching toy format at data/nsp/schema.json.",
   "type": "object",
-  "required": ["id", "horizonDays", "shifts", "nurses", "coverage"],
+  "required": ["horizonDays", "shifts", "nurses", "coverage"],
   "additionalProperties": false,
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier for this instance (e.g. 'toy-01', 'inrc2-n030w4-0-8-9-6-4-8-2-2').",
+      "description": "Unique identifier for this instance (e.g. 'toy-01', 'inrc2-n030w4-0-8-9-6-4-8-2-2'). Server-generated if omitted on upload.",
       "minLength": 1
     },
     "name": {
@@ -18,30 +18,38 @@
     },
     "source": {
       "type": "string",
-      "description": "Origin of the instance ('toy', 'nsplib', 'inrc1', 'inrc2', 'custom').",
+      "description": "Origin of the instance.",
       "enum": ["toy", "nsplib", "inrc1", "inrc2", "custom"]
     },
     "horizonDays": {
       "type": "integer",
       "description": "Number of days in the planning horizon (0..horizonDays-1).",
-      "minimum": 1
+      "minimum": 1,
+      "maximum": 90
     },
     "shifts": {
       "type": "array",
       "description": "Shift types that a nurse can work. An off-day is the absence of any shift.",
       "minItems": 1,
+      "maxItems": 20,
       "items": { "$ref": "#/$defs/Shift" }
     },
     "nurses": {
       "type": "array",
       "description": "Nurses available to be scheduled.",
       "minItems": 1,
+      "maxItems": 200,
       "items": { "$ref": "#/$defs/Nurse" }
     },
     "coverage": {
       "type": "array",
       "description": "Required number of nurses per (day, shift) cell.",
       "items": { "$ref": "#/$defs/CoverageRequirement" }
+    },
+    "preferences": {
+      "type": "array",
+      "description": "Soft preferences (flat list at instance root) contributing to SC-1.",
+      "items": { "$ref": "#/$defs/Preference" }
     },
     "forbiddenTransitions": {
       "type": "array",
@@ -53,9 +61,27 @@
         "items": { "type": "string" }
       }
     },
+    "minRestHours": {
+      "type": "integer",
+      "description": "Minimum rest hours between consecutive shifts (EU Working Time Directive baseline = 11). Used to derive forbiddenTransitions when shifts declare startMinutes/durationMinutes.",
+      "minimum": 0,
+      "default": 11
+    },
+    "maxConsecutiveWorkingDays": {
+      "type": "integer",
+      "description": "Global upper bound on consecutive days any nurse can work (HC-4); per-nurse override via Nurse.maxConsecutiveWorkingDays.",
+      "minimum": 1,
+      "default": 6
+    },
+    "maxConsecutiveNights": {
+      "type": "integer",
+      "description": "Global upper bound on consecutive night shifts (HC-5).",
+      "minimum": 1,
+      "default": 3
+    },
     "metadata": {
       "type": "object",
-      "description": "Free-form per-instance metadata (loader version, benchmark tag, etc.).",
+      "description": "Free-form per-instance metadata (loader version, benchmark tag, contractTolerance, etc.).",
       "additionalProperties": true
     }
   },
@@ -72,22 +98,37 @@
         },
         "label": {
           "type": "string",
-          "description": "Human-readable shift name (e.g. 'Morning')."
+          "description": "Human-readable shift name (e.g. 'Morning').",
+          "minLength": 1
+        },
+        "start": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Local-time start in 24-hour HH:MM format (toy-style alternative to startMinutes)."
+        },
+        "end": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "Local-time end in 24-hour HH:MM format (toy-style alternative to startMinutes+durationMinutes)."
         },
         "startMinutes": {
           "type": "integer",
           "minimum": 0,
           "maximum": 1439,
-          "description": "Local-time start minute of the shift (0..1439)."
+          "description": "Local-time start minute of the shift (0..1439). Either startMinutes+durationMinutes or start+end must be present."
         },
         "durationMinutes": {
           "type": "integer",
           "minimum": 1,
           "description": "Shift duration in minutes."
         },
+        "isNight": {
+          "type": "boolean",
+          "description": "Explicit night-shift tag for HC-5; if omitted, inferred from startMinutes or id/label matching."
+        },
         "skill": {
           "type": "string",
-          "description": "Required skill tag, if any."
+          "description": "Required skill tag (a nurse must hold this skill to be assigned the shift)."
         }
       }
     },
@@ -107,7 +148,14 @@
           "type": "array",
           "items": { "type": "string" },
           "uniqueItems": true,
-          "description": "Skill tags the nurse holds."
+          "description": "Skill tags the nurse holds.",
+          "default": []
+        },
+        "contractHoursPerWeek": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 80,
+          "description": "Weekly contract hours used by HC-8."
         },
         "maxShiftsPerWeek": {
           "type": "integer",
@@ -119,12 +167,8 @@
         },
         "maxConsecutiveWorkingDays": {
           "type": "integer",
-          "minimum": 1
-        },
-        "preferences": {
-          "type": "array",
-          "description": "Soft preferences — positive weight = desire, negative = avoidance.",
-          "items": { "$ref": "#/$defs/Preference" }
+          "minimum": 1,
+          "description": "Per-nurse override for HC-4."
         },
         "unavailable": {
           "type": "array",
@@ -133,13 +177,14 @@
             "type": "integer",
             "minimum": 0
           },
-          "uniqueItems": true
+          "uniqueItems": true,
+          "default": []
         }
       }
     },
     "CoverageRequirement": {
       "type": "object",
-      "required": ["day", "shiftId", "required"],
+      "required": ["day", "shiftId"],
       "additionalProperties": false,
       "properties": {
         "day": {
@@ -150,33 +195,66 @@
           "type": "string",
           "minLength": 1
         },
+        "min": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Minimum number of nurses required for this cell."
+        },
+        "max": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum number of nurses assignable to this cell. Must be >= min."
+        },
         "required": {
           "type": "integer",
           "minimum": 0,
-          "description": "Exact (or minimum, depending on solver config) number of nurses for this cell."
+          "description": "Alias for 'min' when uploading. If present without min/max, it is treated as both the floor and the ceiling (exact staffing)."
+        },
+        "requiredSkills": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true,
+          "description": "Skill tags — the nurses on this cell must collectively cover each tag (HC-7).",
+          "default": []
         },
         "skill": {
           "type": "string",
-          "description": "If present, the coverage must be filled by nurses holding this skill."
+          "description": "Deprecated single-skill alias; prefer requiredSkills."
         }
       }
     },
     "Preference": {
       "type": "object",
-      "required": ["day", "shiftId", "weight"],
+      "required": ["nurseId", "kind", "weight"],
       "additionalProperties": false,
       "properties": {
+        "nurseId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "References a defined Nurse.id."
+        },
         "day": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "description": "Day index within the horizon. Optional: if omitted, the preference applies across every day."
         },
         "shiftId": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ],
+          "description": "Null = preference about a day-off; string = preference about a specific shift. May be omitted."
+        },
+        "kind": {
           "type": "string",
-          "minLength": 1
+          "enum": ["prefer", "avoid"],
+          "description": "Preferences of kind 'prefer' reward assignment; 'avoid' penalize it."
         },
         "weight": {
           "type": "integer",
-          "description": "Positive = nurse wants this cell; negative = nurse wants to avoid it."
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Strength of the preference; higher = stronger."
         }
       }
     }

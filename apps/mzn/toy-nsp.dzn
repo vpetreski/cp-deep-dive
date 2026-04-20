@@ -1,0 +1,5 @@
+n_nurses = 3;
+n_days = 7;
+n_shifts = 2;
+max_work = 6;
+min_work = 4;

@@ -1,0 +1,7 @@
+timestamp,instance_id,solver,status,objective,bound,gap,solve_seconds,wall_seconds
+2026-04-20T04:15:30.540391Z,toy-01,cpsat,optimal,3.0,3.0,0.0,0.006,0.296
+2026-04-20T04:15:30.872557Z,toy-01,timefold,feasible,1.0,,,15.006,17.923
+2026-04-20T04:15:48.802760Z,toy-01,choco,optimal,0.0,,,0.017,2.787
+2026-04-20T04:15:51.593667Z,toy-02,cpsat,optimal,20.0,20.0,0.0,0.225,0.531
+2026-04-20T04:15:52.128628Z,toy-02,timefold,feasible,1.0,,,15.006,17.930
+2026-04-20T04:16:10.061251Z,toy-02,choco,optimal,0.0,,,2.498,5.262
