@@ -1,11 +1,15 @@
 // Common conventions for every chapter subproject.
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
 }
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
-    apply(plugin = "application")
+    // nsp-core is a library — chapters are applications.
+    if (name != "nsp-core") {
+        apply(plugin = "application")
+    }
 
     extensions.configure<JavaPluginExtension> {
         toolchain {
@@ -27,6 +31,22 @@ subprojects {
 
     dependencies {
         add("implementation", rootProject.libs.cpsat.kt)
+        add("implementation", rootProject.libs.kotlinx.coroutines.core)
+        add("testImplementation", rootProject.libs.kotest.runner.junit5)
+        add("testImplementation", rootProject.libs.kotest.assertions.core)
+        add("testImplementation", rootProject.libs.kotlinx.coroutines.test)
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+        // OR-Tools native loader mutates JVM state — run serially.
+        maxParallelForks = 1
+        maxHeapSize = "2g"
+        systemProperty("kotest.framework.parallelism", "1")
+        testLogging {
+            events("passed", "failed", "skipped")
+            showStandardStreams = project.hasProperty("verbose")
+        }
     }
 }
 

@@ -2,9 +2,18 @@
 # Keep in lockstep with libs/cpsat-kt/gradle/libs.versions.toml.
 kotlin = "2.3.20"
 cpsat-kt = "0.1.0"
+coroutines = "1.10.2"
+kotest = "5.9.1"
+serialization = "1.9.0"
 
 [libraries]
 cpsat-kt = { module = "io.vanja:cpsat-kt", version.ref = "cpsat-kt" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
+kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
