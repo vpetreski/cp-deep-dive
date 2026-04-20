@@ -32,11 +32,22 @@ The **Nurse Scheduling Problem (NSP)** — assign nurses to shifts across a plan
 8. **End-to-end application** — FastAPI + Kotlin/Ktor twin backend, web UI for schedule visualization + what-if, deployment.
 9. **Ecosystem tour** — how other solvers (Choco, Timefold) approach the same problem.
 
-Detailed plan with chapter-by-chapter breakdown: [`plan.md`](plan.md) (created in the next phase).
+Detailed plan with chapter-by-chapter breakdown: [`plan.md`](plan.md).
+
+## Knowledge base
+
+Deep-dive notes already in the repo (indexed by QMD — ask about any topic and I'll pull the right file):
+
+- [`knowledge/cp-theory/overview.md`](knowledge/cp-theory/overview.md) — ELI5 CP primer, CSP vs COP, how solvers work (propagation + search + LCG), global constraints, CP vs MILP vs SAT comparison, 12-source bibliography.
+- [`knowledge/cp-sat/overview.md`](knowledge/cp-sat/overview.md) — OR-Tools CP-SAT reference: install, core API, constraints table, scheduling primitives, search tuning, best practices.
+- [`knowledge/cp-sat/python-vs-kotlin.md`](knowledge/cp-sat/python-vs-kotlin.md) — Python and Kotlin side-by-side: API diff table, idioms, build tooling (uv / Gradle), testing, Kotlin gotchas.
+- [`knowledge/minizinc/overview.md`](knowledge/minizinc/overview.md) — MiniZinc language tour, FlatZinc architecture, backends, how it fits with CP-SAT.
+- [`knowledge/nurse-scheduling/overview.md`](knowledge/nurse-scheduling/overview.md) — NSP deep dive: NP-hardness, hard/soft constraint taxonomy, benchmarks (NSPLib, INRC-I/II), CP-SAT modeling sketches, seminal papers.
+- [`knowledge/ecosystem/overview.md`](knowledge/ecosystem/overview.md) — Choco, Gecode, Chuffed, Timefold, Z3, MILP solvers, modeling layers, 2024–2026 trends, picking-a-tool mental model.
 
 ## Current status
 
-Phase 0 (setup) complete. Research + plan drafting next.
+Phase 0 (setup + research) complete. Plan drafted in [`plan.md`](plan.md), awaiting iteration + lock-in before execution.
 
 ## Key external references
 
@@ -44,4 +55,4 @@ Phase 0 (setup) complete. Research + plan drafting next.
 - Google OR-Tools — [docs home](https://developers.google.com/optimization), [intro](https://developers.google.com/optimization/introduction), [CP section](https://developers.google.com/optimization/cp), [CP-SAT solver](https://developers.google.com/optimization/cp/cp_solver), [scheduling](https://developers.google.com/optimization/scheduling), [employee scheduling](https://developers.google.com/optimization/scheduling/employee_scheduling)
 - MiniZinc — [minizinc.org](https://www.minizinc.org/)
 
-Full annotated reference lists move into `docs/knowledge/<area>/references.md` as research lands.
+Full annotated reference lists live inside each `docs/knowledge/<area>/overview.md`.
