@@ -2,7 +2,7 @@
 
 **Purpose:** become a practitioner of Constraint Programming / Constraint Optimization, using the Nurse Scheduling Problem as the running use case, with Google OR-Tools CP-SAT via **Python** and an idiomatic **Kotlin DSL we build ourselves** (`cpsat-kt`), plus **MiniZinc** as a teaching companion.
 
-This file is the always-loaded anchor. Vanja's entry point is [`../README.md`](../README.md). For the living plan see [`plan.md`](plan.md). For deep knowledge see [`knowledge/`](knowledge/) (QMD-indexed).
+This file is the always-loaded anchor used by Claude Code. The human entry point for the repo is [`../README.md`](../README.md). For the living plan see [`plan.md`](plan.md). For deep knowledge see [`knowledge/`](knowledge/) (QMD-indexed).
 
 ## The field in one paragraph
 

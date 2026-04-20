@@ -2,14 +2,14 @@
 
 **Status:** accepted
 **Date:** 2026-04-19
-**Deciders:** Vanja, Claude
+**Deciders:** maintainer, Claude
 
 ## Context
 
 Plan v0.1 left multiple stack decisions open (JVM version, frontend framework,
-Kotlin backend framework, Python package manager). Vanja's feedback during the
-v0.1 → v0.2 iteration provided concrete locks for each. This ADR captures the
-decision set so future contributors see *why* — not just *what*.
+Kotlin backend framework, Python package manager). Maintainer feedback during
+the v0.1 → v0.2 iteration provided concrete locks for each. This ADR captures
+the decision set so future contributors see *why* — not just *what*.
 
 ## Decision
 

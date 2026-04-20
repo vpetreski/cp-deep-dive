@@ -1,6 +1,8 @@
-# cp-deep-dive — Vanja Petreski's Constraint Programming / Optimization deep dive
+# cp-deep-dive — maintainer's Claude operating instructions
 
-This repo is a structured, long-form learning project where Vanja becomes a practitioner of Constraint Programming / Constraint Optimization. The running use case is the **Nurse Scheduling Problem (NSP)** solved with **Google OR-Tools CP-SAT** in both **Python** and **Kotlin** (via our own idiomatic DSL `cpsat-kt`), with **MiniZinc** as a solver-agnostic modeling companion during learning. The capstone is a full end-to-end NSP app: FastAPI + Ktor 3 twin backends, Vite + React 19 + React Router v7 frontend, built from a locked-in markdown spec.
+> **Reader note (if you're not the maintainer):** this is the maintainer's personal working agreement with Claude Code for this repo. It is tuned to their learning style, tooling choices, and collaboration preferences. You are welcome to read it for context, fork it, or adapt it — but treat it as one person's setup, not a generic "how to use this repo" doc. The canonical learner-facing entry point is [`README.md`](README.md), and the locked plan is [`docs/plan.md`](docs/plan.md).
+
+This repo is a structured, long-form learning project where the maintainer becomes a practitioner of Constraint Programming / Constraint Optimization. The running use case is the **Nurse Scheduling Problem (NSP)** solved with **Google OR-Tools CP-SAT** in both **Python** and **Kotlin** (via our own idiomatic DSL `cpsat-kt`), with **MiniZinc** as a solver-agnostic modeling companion during learning. The capstone is a full end-to-end NSP app: FastAPI + Ktor 3 twin backends, Vite + React 19 + React Router v7 frontend, built from a locked-in markdown spec.
 
 This file is always loaded. Read it first. Deep knowledge lives under `docs/knowledge/` and is searchable via QMD — don't read large files whole, query them.
 
@@ -8,7 +10,7 @@ This file is always loaded. Read it first. Deep knowledge lives under `docs/know
 
 ```
 cp-deep-dive/
-├── README.md                  <- canonical entry point for Vanja — start here, links everywhere
+├── README.md                  <- canonical public entry point — start here, links everywhere
 ├── CLAUDE.md                  <- you are here — rules + routing + autonomous behaviors
 ├── AGENTS.md                  <- pointer to CLAUDE.md
 ├── .claude/
@@ -50,7 +52,7 @@ cp-deep-dive/
 └── .github/workflows/         <- CI (Py + Kt lint/test)
 ```
 
-Artifacts not yet created (scaffolded after plan lock-in): `libs/`, `specs/`, `apps/`, `data/`, `benchmarks/`, `docs/chapters/`, `docs/adr/`, `.github/workflows/`.
+All artifacts listed above are present and built — see `PROGRESS.md` and `CHANGELOG.md` for status.
 
 ## How we work together (teach-me mode)
 

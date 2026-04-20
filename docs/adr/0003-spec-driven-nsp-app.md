@@ -2,7 +2,7 @@
 
 **Status:** accepted
 **Date:** 2026-04-19
-**Deciders:** Vanja, Claude
+**Deciders:** maintainer, Claude
 
 ## Context
 
@@ -10,8 +10,8 @@ The Phase 7 NSP app is the most complex artefact in the project — two backends
 a web UI, a shared OpenAPI contract, persistence, observability, deployment.
 Building it ad-hoc would almost certainly produce something misaligned with the
 learning goals (the app should *showcase* the solver cleanly, not wrestle with
-accidental complexity). Vanja strongly believes in spec-driven development and
-wants a documented source of truth before any code.
+accidental complexity). This project treats spec-driven development as a core
+discipline and requires a documented source of truth before any code.
 
 ## Decision
 
@@ -19,8 +19,8 @@ Chapter 14 (Phase 6) writes and locks `specs/nsp-app/` in full **before** any
 code is written in Phase 7. The spec covers overview, vision/goals, user
 stories, domain model, functional + non-functional requirements, API contract
 (with OpenAPI 3.1 YAML), UI/UX wireframes, data model, and acceptance criteria.
-Lock is marked by Vanja explicitly saying "locked v1.0" and tagging the repo
-`spec-nsp-app-v1.0`. Subsequent changes require an explicit spec amendment
+Lock is marked by the maintainer explicitly saying "locked v1.0" and tagging
+the repo `spec-nsp-app-v1.0`. Subsequent changes require an explicit spec amendment
 (version bump + CHANGELOG update in `specs/nsp-app/README.md`).
 
 ## Alternatives considered

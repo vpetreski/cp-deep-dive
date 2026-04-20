@@ -4,7 +4,7 @@
 
 ## Goal
 
-Produce a **complete, locked markdown specification** for the end-to-end NSP application before any application code is written. You'll author ten spec files under `specs/nsp-app/`, walk each through with Claude, and only when Vanja explicitly says "locked v1.0" does Phase 7 implementation start.
+Produce a **complete, locked markdown specification** for the end-to-end NSP application before any application code is written. You'll author ten spec files under `specs/nsp-app/`, walk each through with Claude, and only when the maintainer says "locked v1.0" does Phase 7 implementation start.
 
 This is the only chapter with **no solver work**. It's a practice of the discipline every serious software project needs and few learners actually do: write the contract first.
 
@@ -442,13 +442,13 @@ Tests: `apps/py-api/tests/test_cancel.py`, `apps/kt-api/src/test/kotlin/CancelSp
 1. Walk every file top-to-bottom with Claude.
 2. Claude checks: every FR → AC mapping; every US → FR mapping; every endpoint in 06 covers a US in 02; every domain entity in 03 has a JSON schema in 08.
 3. Fix inconsistencies; re-run checks.
-4. Vanja says out loud: "locked v1.0."
+4. The maintainer marks the spec locked: "locked v1.0."
 5. Tag: `git tag spec-nsp-app-v1.0 && git push --tags`.
 6. Update `specs/nsp-app/README.md` version history.
 
 From this moment, **no Phase 7 code starts before the tag**. Spec amendments require a named review step (see `specs/nsp-app/README.md §Change-control`).
 
-## 5. Locking the spec with Vanja
+## 5. Locking the spec
 
 The lock is **not a formality**. It's a commitment that downstream implementers can build from spec alone. Claude's role at lock-time:
 
@@ -458,7 +458,7 @@ The lock is **not a formality**. It's a commitment that downstream implementers 
 - Verify every FR has an AC and vice versa.
 - Ensure `apps/shared/openapi.yaml` validates with `redocly lint` or `swagger-cli validate`.
 
-Vanja's role:
+The maintainer's role:
 
 - Challenge each goal: "is this actually v1.0 scope?"
 - Cut ruthlessly. A locked spec with 12 FRs is better than a locked spec with 30.
@@ -510,10 +510,10 @@ Candidates: backup/export, rate-limiting, concurrent runs per instance, audit tr
 Gaps usually show up around union types, SSE events, or non-JSON content. Document them in a "spec limitations" section of 06.
 </details>
 
-**Exercise 14-E: Write the change-control policy.** In `specs/nsp-app/README.md`, write 1 paragraph on how spec changes get proposed, reviewed, and merged. Include: who approves (Vanja), where it lives (a PR with label `spec`), when a minor/major bump is required.
+**Exercise 14-E: Write the change-control policy.** In `specs/nsp-app/README.md`, write 1 paragraph on how spec changes get proposed, reviewed, and merged. Include: who approves (the maintainer), where it lives (a PR with label `spec`), when a minor/major bump is required.
 
 <details><summary>Hint</summary>
-Example: "Minor bump for any additive change (new optional field, new endpoint). Major bump for any breaking change (removed field, changed semantics). All changes require Vanja's approval and a CHANGELOG entry in the top-level README version history table."
+Example: "Minor bump for any additive change (new optional field, new endpoint). Major bump for any breaking change (removed field, changed semantics). All changes require the maintainer's approval and a CHANGELOG entry in the top-level README version history table."
 </details>
 
 ## 9. Self-check

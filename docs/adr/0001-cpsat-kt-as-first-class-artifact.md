@@ -2,7 +2,7 @@
 
 **Status:** accepted
 **Date:** 2026-04-19
-**Deciders:** Vanja, Claude
+**Deciders:** maintainer, Claude
 
 ## Context
 
@@ -11,7 +11,7 @@ surface is raw Java. Calling that Java directly from Kotlin is ergonomically
 poor: no operator overloading, verbose constraint construction, nullable
 platform types everywhere, exception-based result handling, and no sealed
 result types. The repo's stated goal is dual-language parity with **idiomatic**
-Kotlin. Vanja also wants the wrapper to be publishable independently so the
+Kotlin. The wrapper is also meant to be publishable independently so the
 work has value beyond the learning project.
 
 ## Decision
@@ -22,8 +22,8 @@ repo. Treat it as a real artifact: its own Gradle build, version, tests,
 README, changelog, Dokka docs, publishable to Maven Central.
 
 ## Alternatives considered
-- **Use the raw Java API from Kotlin:** rejected — the ergonomics are bad and
-  Vanja explicitly pushed back on this during plan iteration.
+- **Use the raw Java API from Kotlin:** rejected — the ergonomics are bad,
+  and the repo's idiomatic-Kotlin goal was established during plan iteration.
 - **Adopt a third-party Kotlin wrapper:** none maintained or feature-complete
   as of 2026-04.
 - **Use Timefold or Choco instead of CP-SAT:** rejected — the learning goal is

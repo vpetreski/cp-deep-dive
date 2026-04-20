@@ -2,15 +2,15 @@
 
 **Status:** accepted
 **Date:** 2026-04-19
-**Deciders:** Vanja, Claude
+**Deciders:** maintainer, Claude
 
 ## Context
 
 The project's stated goal is mastery of CP-SAT across two languages. The
 *comparison* — same problem, same solver, two language-level expressions — is
 a core learning mechanism. Asymmetric coverage (Python-first, Kotlin as
-afterthought) would leak the abstraction: Vanja would learn Python CP-SAT
-idioms fluently and Kotlin CP-SAT idioms shallowly.
+afterthought) would leak the abstraction: a learner would pick up Python
+CP-SAT idioms fluently and Kotlin CP-SAT idioms shallowly.
 
 ## Decision
 
@@ -25,7 +25,7 @@ where we show raw Java-in-Kotlin once to motivate building the wrapper.
   drifted.
 - **Kotlin-only using JVM tooling:** rejected — Python's CP-SAT bindings are
   first-party and many references/papers use Python; skipping it would leave
-  Vanja illiterate in the larger community.
+  the learner illiterate in the larger community.
 - **Parity on a subset (e.g. chapters 1–6 only):** rejected — the app in
   Phase 7 *requires* both languages, so parity must hold through the whole
   ladder.

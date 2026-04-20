@@ -2,7 +2,7 @@
 
 **Status:** proposed | accepted | deprecated | superseded-by-ADR-MMMM
 **Date:** YYYY-MM-DD
-**Deciders:** Vanja, Claude
+**Deciders:** maintainer, Claude
 
 ## Context
 (What's the situation? What forces are at play?)

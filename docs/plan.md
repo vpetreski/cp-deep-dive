@@ -2,7 +2,7 @@
 
 **Version:** v0.2 (locked — full scaffold complete, Chapter 1 open)
 **Last updated:** 2026-04-19
-**Owner:** Vanja (student) + Claude (teacher/pair)
+**Owner:** the maintainer (author) + Claude Code (pair)
 
 This is the living roadmap. The repo is fully scaffolded: `libs/cpsat-kt/` v0.1.0 (41/41 tests green), all 18 chapter MDs under `docs/chapters/`, Python + Kotlin + Web apps in `apps/`, `specs/nsp-app/` skeleton (unlocked, fills in Ch. 14), 4 ADRs, CI, and NSP toy data. **Chapter 1 is open — start at [`chapters/01-what-is-cp.md`](chapters/01-what-is-cp.md).** Mark chapters done here as you complete them.
 
@@ -87,7 +87,7 @@ End of each phase: short retrospective + plan-refresh commit.
 | Layer | Choice | Notes |
 |---|---|---|
 | **Python backend** | **FastAPI + Pydantic v2 + uvicorn** | Typed, fast, async |
-| **Kotlin backend** | **Ktor 3.x** (Vanja's pick) | Lightweight, Kotlin-idiomatic, coroutine-native |
+| **Kotlin backend** | **Ktor 3.x** (the maintainer's pick) | Lightweight, Kotlin-idiomatic, coroutine-native |
 | **Frontend** | **Vite 6 + React 19 + React Router v7 (framework mode) + TypeScript 5 + Tailwind 4 + shadcn/ui** | Modern lightweight SPA/SSR, no vendor lock-in. (RR7 framework mode is the Remix successor.) |
 | **Data layer (web)** | TanStack Query 5 | Cache + async state for the UI |
 | **Schedule viz** | Custom roster grid (rows=nurses, cols=days) + Recharts for KPIs | Keep it domain-specific |
@@ -113,19 +113,19 @@ End of each phase: short retrospective + plan-refresh commit.
 
 ## 3. Answered open questions (v0.1 → v0.2)
 
-Vanja's answers to v0.1's 10 questions, now locked:
+the maintainer's answers to v0.1's 10 questions, now locked:
 
 | # | Question | Answer |
 |---|---|---|
 | 1 | Kotlin parity | **Both languages in every chapter + doc + example**, Kotlin via `cpsat-kt`. |
 | 2 | Frontend | **Claude's choice: Vite 6 + React 19 + React Router v7 framework mode + Tailwind 4 + shadcn/ui + TanStack Query.** Fast, modern, lightweight. |
 | 3 | Kotlin backend | **Ktor 3.x.** |
-| 4 | Workflow | **Scaffolding-first, README-led chapters.** After plan lock, Claude scaffolds everything; Vanja opens `README.md` and works with Claude monitoring + answering + updating. |
+| 4 | Workflow | **Scaffolding-first, README-led chapters.** After plan lock, Claude scaffolds everything; the maintainer opens `README.md` and works with Claude monitoring + answering + updating. |
 | 5 | Benchmark ambition | **"Do our best."** Match baseline; push for improvements where reachable. |
 | 6 | MiniZinc weight | **Claude decides** → keep as teaching tool (Phase 3, 2 chapters); **not in production app** (unclear ROI for shipping a MiniZinc layer when CP-SAT natively does the job). |
 | 7 | Phase 8 port target | **Both Timefold + Choco.** (Shorter port per solver.) |
 
-New additions from Vanja's feedback:
+New additions from the maintainer's feedback:
 - JDK 25 LTS (was 21).
 - **New Chapter 3**: build `cpsat-kt` v0.1 — the Kotlin DSL library — as a first-class artifact.
 - **New Phase 6 (Chapter 14)**: spec-driven app design. Full markdown spec in `specs/nsp-app/`, locked before Phase 7 implementation.
@@ -372,7 +372,7 @@ Where everything converges.
 
 #### Chapter 14 — Write & LOCK the NSP app spec
 
-- **Goal:** Produce a complete, locked markdown specification for the end-to-end NSP app. No app code written until this is locked by Vanja.
+- **Goal:** Produce a complete, locked markdown specification for the end-to-end NSP app. No app code written until this is locked by the maintainer.
 - **New concepts:** spec-driven development, structured markdown specs, acceptance criteria, API-first design, OpenAPI 3.1.
 - **Hands-on:**
   - Write `specs/nsp-app/` with these files:
@@ -387,7 +387,7 @@ Where everything converges.
     - `08-data-model.md` — JSON schemas, DB ERD, instance file format
     - `09-acceptance-criteria.md` — how we know the app is "done"
     - `README.md` — spec index + version history
-  - Review together, iterate, Vanja explicitly says "locked v1.0".
+  - Review together, iterate, the maintainer explicitly says "locked v1.0".
 - **Deliverable:** `specs/nsp-app/` at v1.0, tagged in git (`spec-nsp-app-v1.0`).
 - **Self-check:**
   - Could another engineer implement the app from only the spec without asking you anything? If no, what's missing?
@@ -438,7 +438,7 @@ Built strictly from the locked spec.
   - Dockerfiles for py-api, kt-api, web.
   - `docker-compose.yml` with both backends + UI.
   - Simple auth (API key) + request logging.
-  - Deploy: Fly.io (default) or local-only (if Vanja prefers).
+  - Deploy: Fly.io (default) or local-only (if the maintainer prefers).
 - **Deliverable:** `docker compose up` works end-to-end. Deploy URL or deploy runbook.
 - **Self-check:**
   - Biggest surprise shipping a CP app?
@@ -529,11 +529,11 @@ cp-deep-dive/
 
 ## 7. Ground rules & working agreement
 
-- **Vanja drives, Claude teaches.** Vanja types; Claude explains, suggests, reviews, unblocks.
+- **the maintainer drives, Claude teaches.** the maintainer types; Claude explains, suggests, reviews, unblocks.
 - **Pause any time.** If a concept isn't clicking, we rewind, find a smaller example, or drop a rabbit hole.
 - **No hand-waving.** Skipping a step requires a follow-up question.
 - **Every chapter ends with a committed deliverable.** No WIP rotting on branches.
-- **Every confusing moment becomes a chapter note.** Vanja's words, for Vanja's future self.
+- **Every confusing moment becomes a chapter note.** the maintainer's words, for the maintainer's future self.
 - **Disagreements become ADRs.** `docs/adr/NNNN-slug.md`.
 - **Plan is a living doc.** We edit when reality disagrees. No pride.
 - **`cpsat-kt` evolves with chapters.** If a chapter needs an API the wrapper lacks, we add it (tested, docstringed, committed) *before* the chapter code.

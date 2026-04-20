@@ -597,12 +597,14 @@ We need a stable identifier for the Kotlin DSL library. Three options surveyed:
 - `dev.vanja.cpsat` + `dev.vanja:cpsat-kt`
 
 ## Decision
-Package: `io.vanja.cpsat`. Coord: `io.vanja:cpsat-kt`. The domain is Vanja's personal
-domain (reverse-DNS convention), and the artifactId matches the repo name.
+Package: `io.vanja.cpsat`. Coord: `io.vanja:cpsat-kt`. The domain is the
+maintainer's personal domain (reverse-DNS convention), and the artifactId
+matches the repo name.
 
 ## Consequences
-- Future publish to Maven Central requires domain verification on Sonatype; Vanja
-  already owns `vanja.co` and will verify `co.petreski` if/when we re-open this.
+- Future publish to Maven Central requires domain verification on Sonatype;
+  the maintainer owns `vanja.co` and will verify `co.petreski` if/when we
+  re-open this.
 - Easier to fork / rename later: a pure `io.cpsatkt` coord is available as a v2 break
   if the library ever becomes community-owned.
 ```

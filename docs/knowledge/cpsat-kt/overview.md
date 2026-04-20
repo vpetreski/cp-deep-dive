@@ -232,7 +232,7 @@ This means local edits to `libs/cpsat-kt/src/**` are instantly available to chap
 
 ## Open questions (pending answers during Chapter 3)
 
-- **Package name:** `io.vanja.cpsat` (Vanja's domain) vs `io.cpsatkt` (neutral) vs `dev.vanja.cpsat`. Default: `io.vanja.cpsat`.
+- **Package name:** `io.vanja.cpsat` (maintainer's domain) vs `io.cpsatkt` (neutral) vs `dev.vanja.cpsat`. Default: `io.vanja.cpsat`.
 - **Group coordinate:** `io.vanja:cpsat-kt` vs `co.petreski:cpsat-kt`. Default: `io.vanja`.
 - **IntRange vs custom `IntDomain`:** Kotlin's `IntRange` is cheap + ergonomic but doesn't express sparse domains. We'll support `IntRange`, `LongRange`, and `Iterable<Long>` overloads.
 - **How much of `SatParameters` to surface:** start with the 20 most-used fields explicitly typed; expose `fun rawProto(block: SatParameters.Builder.() -> Unit)` for the rest.

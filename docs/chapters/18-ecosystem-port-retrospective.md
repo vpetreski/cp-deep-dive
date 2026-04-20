@@ -773,7 +773,7 @@ Three things to do next, in descending order of impact:
 2. **Write it up.** Exercise 10-C — the 500-word post. Your most compressed, honest take on the journey. Publish it.
 3. **Keep deep-diving.** Pick a chapter 19 — advanced CP, learned heuristics, column generation. Use the same structure: intuition, formal, tiny, Python, Kotlin, compare, exercise.
 
-You did it, Vanja. Go break something interesting.
+You did it. Go break something interesting.
 
 ## §13 Further reading
 
