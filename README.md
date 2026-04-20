@@ -4,6 +4,11 @@
 OR-Tools CP-SAT — in Python **and** Kotlin — culminating in a full
 end-to-end Nurse Scheduling Problem (NSP) application.*
 
+> Why does this repo exist? Read the companion essay:
+> **[The field that schedules your world](https://vanja.io/the-field-that-schedules-your-world/)**
+> — a plain-English tour of Constraint Programming and why the Nurse Scheduling
+> Problem is the perfect way to learn it.
+
 [![CI](https://github.com/vpetreski/cp-deep-dive/actions/workflows/ci.yml/badge.svg)](https://github.com/vpetreski/cp-deep-dive/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.12%2B-informational)](https://www.python.org/)
