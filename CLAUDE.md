@@ -1,6 +1,6 @@
 # cp-deep-dive — Vanja Petreski's Constraint Programming / Optimization deep dive
 
-This repo is a structured, long-form learning project where Vanja becomes a practitioner of Constraint Programming / Constraint Optimization. The running use case is the **Nurse Scheduling Problem (NSP)** solved with **Google OR-Tools CP-SAT** in both **Python** and **Kotlin**, with **MiniZinc** as a solver-agnostic modeling companion, and an eventual end-to-end app + visualization.
+This repo is a structured, long-form learning project where Vanja becomes a practitioner of Constraint Programming / Constraint Optimization. The running use case is the **Nurse Scheduling Problem (NSP)** solved with **Google OR-Tools CP-SAT** in both **Python** and **Kotlin** (via our own idiomatic DSL `cpsat-kt`), with **MiniZinc** as a solver-agnostic modeling companion during learning. The capstone is a full end-to-end NSP app: FastAPI + Ktor 3 twin backends, Vite + React 19 + React Router v7 frontend, built from a locked-in markdown spec.
 
 This file is always loaded. Read it first. Deep knowledge lives under `docs/knowledge/` and is searchable via QMD — don't read large files whole, query them.
 
@@ -8,8 +8,8 @@ This file is always loaded. Read it first. Deep knowledge lives under `docs/know
 
 ```
 cp-deep-dive/
+├── README.md                  <- canonical entry point for Vanja — start here, links everywhere
 ├── CLAUDE.md                  <- you are here — rules + routing + autonomous behaviors
-├── README.md                  <- public-facing purpose + setup
 ├── AGENTS.md                  <- pointer to CLAUDE.md
 ├── .claude/
 │   ├── commands/              <- project slash commands (empty for now)
@@ -18,20 +18,39 @@ cp-deep-dive/
 ├── .mcp.json                  <- QMD HTTP MCP (local daemon on :8181)
 ├── .gitignore
 ├── docs/
-│   ├── overview.md            <- always-loaded summary of the field, the tools, and the plan
-│   ├── plan.md                <- living learning plan — source of truth for "what next"
-│   └── knowledge/             <- QMD-indexed deep knowledge (grow over time)
-│       ├── cp-theory/         <- Constraint Programming theory + concepts
-│       ├── cp-sat/            <- Google OR-Tools CP-SAT deep dive
-│       ├── minizinc/          <- MiniZinc modeling language + solver ecosystem
-│       ├── nurse-scheduling/  <- NSP literature, formal definition, variants
-│       ├── ecosystem/         <- Other tools (Choco, Timefold, Gecode, Z3, etc.)
-│       └── decisions/         <- ADRs — why we chose X over Y
+│   ├── overview.md            <- always-loaded summary of field, tools, status
+│   ├── plan.md                <- the 18-chapter roadmap — source of truth for "what next"
+│   ├── chapters/              <- per-chapter teaching notes (`NN-slug.md`)
+│   ├── knowledge/             <- QMD-indexed reference encyclopedia
+│   │   ├── cp-theory/         <- CP theory + vocabulary
+│   │   ├── cp-sat/            <- OR-Tools CP-SAT deep dive
+│   │   ├── cpsat-kt/          <- our Kotlin DSL library (design + API reference)
+│   │   ├── minizinc/          <- MiniZinc modeling language
+│   │   ├── nurse-scheduling/  <- NSP literature + formal definition
+│   │   └── ecosystem/         <- Choco, Timefold, Gecode, Z3, etc.
+│   └── adr/                   <- architecture decision records (NNNN-slug.md)
+├── libs/
+│   └── cpsat-kt/              <- idiomatic Kotlin DSL wrapper over OR-Tools CP-SAT (first-class artifact, publishable)
+├── specs/
+│   └── nsp-app/               <- locked markdown spec for the end-to-end NSP app
+├── apps/
+│   ├── py-cp-sat/             <- Python chapter code (puzzles, scheduling, NSP)
+│   ├── kt-cp-sat/             <- Kotlin chapter code (uses cpsat-kt)
+│   ├── mzn/                   <- MiniZinc models
+│   ├── py-api/                <- FastAPI backend for NSP app
+│   ├── kt-api/                <- Ktor 3 backend for NSP app
+│   ├── web/                   <- Vite + React 19 + React Router v7 frontend
+│   └── shared/                <- OpenAPI + JSON schemas shared by backends/frontend
+├── data/
+│   └── nsp/                   <- NSP instances (toy + NSPLib + INRC-I/II)
+├── benchmarks/                <- baseline + tuned solver runs
 ├── tools/
 │   ├── setup-memory-link.sh   <- one-time per machine: symlink project memory into repo
 │   └── setup-qmd-hook.sh      <- one-time per machine: install post-commit QMD reindex hook
-└── (future) apps/ code/ experiments/ — added as we build, not now
+└── .github/workflows/         <- CI (Py + Kt lint/test)
 ```
+
+Artifacts not yet created (scaffolded after plan lock-in): `libs/`, `specs/`, `apps/`, `data/`, `benchmarks/`, `docs/chapters/`, `docs/adr/`, `.github/workflows/`.
 
 ## How we work together (teach-me mode)
 
@@ -41,7 +60,7 @@ Vanja is **new to Constraint Programming**. Explanations start ELI5, then scale 
 2. **Minimal formal definition** — one diagram or equation, labeled.
 3. **Tiny worked example** — solvable by hand in 5 lines.
 4. **Python implementation** — CP-SAT, runnable.
-5. **Kotlin implementation** — CP-SAT, same problem, side-by-side contrast.
+5. **Kotlin implementation** — same problem via `cpsat-kt` (our DSL), side-by-side contrast.
 6. **MiniZinc model** (where it adds clarity) — the declarative spec version.
 7. **What this unlocks** — one sentence linking to the next concept.
 
@@ -51,20 +70,25 @@ Rules:
 - Prefer "you" over "we" in explanations (active voice, direct).
 - When two approaches compete, show both briefly and recommend one *with reasoning* — don't hide trade-offs.
 - Code examples are runnable end-to-end. No pseudocode when real code fits.
-- Every Python example has a Kotlin twin in the same chapter unless explicitly scoped out.
+- **Dual-language parity is mandatory** — every Python example has a Kotlin twin using `cpsat-kt`. No single-language chapters.
+- **Kotlin code never calls raw `com.google.ortools.sat.*` directly** — always through `cpsat-kt`. If the wrapper lacks a feature, extend `cpsat-kt` first, *then* use it. One exception: Chapter 2 intentionally shows raw Java-in-Kotlin once to motivate the wrapper.
+- **Spec before app.** The NSP app in `apps/{py-api,kt-api,web}/` only gets built from the locked-in spec in `specs/nsp-app/`. If reality diverges, amend the spec first, then the code.
 
 ## Routing — where to go for what
 
 | When Vanja says... | Work in... | Read first... |
 |---|---|---|
 | "What are we doing?" / "status" / "where are we" | `docs/overview.md` + `docs/plan.md` | `docs/overview.md` |
-| "What is CP?" / "explain constraint programming" / general theory | `docs/knowledge/cp-theory/` | `docs/knowledge/cp-theory/overview.md` (when created) |
+| "What is CP?" / "explain constraint programming" / general theory | `docs/knowledge/cp-theory/` | `docs/knowledge/cp-theory/overview.md` |
 | Anything about CP-SAT internals, API, modeling | `docs/knowledge/cp-sat/` | `docs/knowledge/cp-sat/overview.md` |
+| Anything about our Kotlin DSL / `cpsat-kt` / idiomatic Kotlin API | `libs/cpsat-kt/` + `docs/knowledge/cpsat-kt/` | `docs/knowledge/cpsat-kt/overview.md` |
 | MiniZinc / FlatZinc / solver-agnostic modeling | `docs/knowledge/minizinc/` | `docs/knowledge/minizinc/overview.md` |
 | Nurse Scheduling Problem / NSP / shift scheduling | `docs/knowledge/nurse-scheduling/` | `docs/knowledge/nurse-scheduling/overview.md` |
-| "Why did we pick X?" / architectural decisions | `docs/knowledge/decisions/` | scan ADR filenames |
+| "What's the app supposed to do?" / requirements / API contract / UI scope | `specs/nsp-app/` | `specs/nsp-app/00-overview.md` |
+| "Why did we pick X?" / architectural decisions | `docs/adr/` | scan ADR filenames |
 | "What's the plan?" / "next chapter" / "what's after this" | `docs/plan.md` | `docs/plan.md` |
-| Write code for chapter N | `apps/` or `experiments/` (create if missing) | chapter's markdown in `docs/` |
+| Write code for chapter N | `apps/py-*/chNN-*/` + `apps/kt-*/chNN-*/` | `docs/chapters/NN-*.md` |
+| Extend the Kotlin DSL | `libs/cpsat-kt/src/main/kotlin/` | `docs/knowledge/cpsat-kt/overview.md` |
 
 ## QMD for deep knowledge retrieval
 
@@ -88,7 +112,11 @@ Fallback: if QMD returns "connection refused", restart the daemon: `launchctl ki
 - Watch for knowledge files growing past **~500 lines with clear sub-sections** → propose a split.
 - Watch for duplication across files → consolidate + cross-reference.
 
-**ADRs.** When we make a non-obvious decision (picking a solver, choosing a language feature, bounding scope), write a short ADR in `docs/knowledge/decisions/NNNN-slug.md`.
+**ADRs.** When we make a non-obvious decision (picking a solver, choosing a language feature, bounding scope), write a short ADR in `docs/adr/NNNN-slug.md`.
+
+**Spec maintenance.** When Vanja changes what the NSP app should do mid-build, update `specs/nsp-app/` first (and bump spec version), then the code. Never let code drift from a locked spec silently — either amend the spec or revert the code.
+
+**`cpsat-kt` hygiene.** When a chapter uses a CP-SAT feature the DSL doesn't cover, extend `cpsat-kt` (add the API + test + short docstring) before the chapter. Commit `cpsat-kt:` changes separately from chapter code.
 
 **Git.** Commit after every meaningful change. `<area>: <action>` format (`cp-sat: add chapter on IntVar and linear constraints`, `nurse-scheduling: document HC-1..HC-5`, `docs: update plan after chapter 2`). Push to `origin/main` immediately unless told to batch. One logical change = one commit. Never skip hooks, never force-push, never amend published commits.
 
@@ -117,19 +145,22 @@ For everything else: act, then report.
 
 ## Teaching cadence
 
-- **Chapter = one concept, top-to-bottom.** Intuition → formal → tiny example → Python → Kotlin → MiniZinc (if it helps) → what's next.
-- **Code lives next to the chapter.** Chapter 03 on `IntVar` gets `apps/python/ch03-intvars/` + `apps/kotlin/ch03-intvars/`. Same input/output contract.
-- **Exercises at end of chapter.** 3-5 small ones with hidden solutions.
-- **Complexity ramps.** Only add a new concept when the previous one is working end-to-end in both languages.
+- **Chapter = one concept, top-to-bottom.** Intuition → formal → tiny example → Python → Kotlin (via `cpsat-kt`) → MiniZinc (if it helps) → what's next.
+- **Code lives next to the chapter.** Chapter 03 on `IntVar` gets `apps/py-cp-sat/ch03-intvars/` + `apps/kt-cp-sat/ch03-intvars/`. Same input/output contract.
+- **Exercises at end of chapter.** 3–5 small ones, hidden solutions in `solutions/` subfolder.
+- **Complexity ramps.** Only add a new concept when the previous one works end-to-end in both languages with the same output.
 
 ## Key principles
 
 - **Mastery over coverage.** Better to deeply understand 5 concepts than skim 20.
 - **Runnable everything.** If it's not runnable, it's incomplete. No pseudocode for real examples.
-- **Two languages, same problem.** Python and Kotlin stay lockstep — that's the whole point of the comparison.
-- **MiniZinc as spec.** Use MiniZinc when the declarative form clarifies the math; skip when it's just ceremony.
+- **Dual-language parity.** Python and `cpsat-kt`-powered Kotlin stay lockstep — comparison is the whole point.
+- **Idiomatic Kotlin via `cpsat-kt`.** Never raw `com.google.ortools.sat.*` in Kotlin code (except the one motivational chapter).
+- **Spec-driven apps.** The NSP app is built from `specs/nsp-app/`, locked before impl. Divergence → amend spec, then code.
+- **Latest modern defaults.** JDK 25 (LTS), Kotlin 2.1+, Gradle 9, Python 3.12+ via uv, Node 22+. Upgrade on schedule, don't linger on older versions.
+- **MiniZinc as teaching tool.** Used during learning phases; not in the production app unless a concrete case proves value.
 - **Public-ish repo, private by default.** Repo is private on GitHub. Don't leak personal details. Fine to share code snippets publicly later with permission.
-- **No hallucinated APIs.** If uncertain about a CP-SAT or MiniZinc API, grep the OR-Tools / MiniZinc source or ask — never guess.
+- **No hallucinated APIs.** If uncertain about a CP-SAT, `cpsat-kt`, or MiniZinc API, grep the source or ask — never guess.
 
 ## Commit conventions
 
@@ -137,15 +168,22 @@ For everything else: act, then report.
   - `docs: add plan.md`
   - `cp-theory: add chapter 1 — what is constraint programming`
   - `cp-sat: document NewIntVar and NewBoolVar with examples`
+  - `cpsat-kt: add IntVar + BoolVar DSL with operator overloads`
+  - `cpsat-kt: extend DSL with Automaton constraint`
   - `minizinc: add alldifferent example`
   - `nurse-scheduling: formalize hard constraints HC-1..HC-8`
+  - `specs/nsp-app: lock v1.0`
+  - `apps/web: scaffold Vite + React Router v7 project`
   - `setup: add QMD post-commit hook`
 - Commit after every chapter/section. Push immediately.
+- Separate `cpsat-kt:` commits from chapter-code commits when both change in one session.
 
 ## Don'ts
 
 - Don't commit `.env` or credentials (there are none right now, but the rule stays)
 - Don't create files outside the structure above without reason
-- Don't write a chapter in only one language when both are in scope
+- Don't write a chapter in only one language — dual-parity is mandatory
+- Don't use raw `com.google.ortools.sat.*` in Kotlin — go through `cpsat-kt`
+- Don't write app code that contradicts a locked spec — amend the spec first
 - Don't add abstractions, frameworks, or configuration systems until there are 3+ concrete uses
-- Don't invent CP-SAT or MiniZinc APIs — verify first
+- Don't invent CP-SAT, `cpsat-kt`, or MiniZinc APIs — verify first

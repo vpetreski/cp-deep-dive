@@ -2,6 +2,8 @@
 
 A practical side-by-side guide for building OR-Tools CP-SAT models in both languages. Targeted at April 2026 state of the ecosystem.
 
+> **Scope note for this project.** The Java/Kotlin code blocks below show how the raw Java OR-Tools API works from Kotlin — useful as motivation and for understanding the underlying machinery. In `cp-deep-dive` itself, actual Kotlin chapter/app code **always** uses our own idiomatic DSL, **[`cpsat-kt`](../cpsat-kt/overview.md)**, never `com.google.ortools.sat.*` directly (one exception: Chapter 2 shows the raw-Java pain point once to motivate the wrapper). The Python sections are the real API you'll use; the Kotlin sections below are the "what we're wrapping" reference.
+
 ## 1. The reality: the solver is C++
 
 CP-SAT's core is a C++ solver. Everything you write in Python, Java, or Kotlin is a **thin model-building layer** that emits a protobuf (`CpModelProto`) which gets handed to the native solver through JNI (JVM) or pybind11 (Python). Once that proto crosses the native boundary, the language you built it in is irrelevant — solving is 100% C++, multi-threaded, and identical whether the caller is a Jupyter notebook or a Kotlin micro-service.

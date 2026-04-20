@@ -1,6 +1,8 @@
 # CP-SAT: Deep Overview
 
-A foundational reference for learning Google OR-Tools' CP-SAT solver in both Python and Kotlin/Java. Targets OR-Tools **v9.15.6755** (released 2026-01-12 / PyPI 2026-01-14), the current stable as of April 2026.
+A foundational reference for learning Google OR-Tools' CP-SAT solver in both Python and Kotlin. Targets OR-Tools **v9.15.6755** (released 2026-01-12 / PyPI 2026-01-14), the current stable as of April 2026.
+
+> **Kotlin note.** This document covers the underlying Java API (which is the only JVM binding OR-Tools ships). In `cp-deep-dive`, Kotlin code does **not** call `com.google.ortools.sat.*` directly — it goes through **[`cpsat-kt`](../cpsat-kt/overview.md)**, our idiomatic Kotlin DSL wrapper. Read this file to understand what the solver does; read the `cpsat-kt` overview for how to use it from Kotlin.
 
 ---
 
