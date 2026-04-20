@@ -1,45 +1,122 @@
+# ---------------------------------------------------------------------------
+# cp-deep-dive .gitignore
+# ---------------------------------------------------------------------------
+
 # OS
 .DS_Store
 Thumbs.db
 
-# Editor
+# Editor / IDE
 .vscode/
 .idea/
+*.iml
 *.swp
 *.swo
 *~
+.fleet/
+.nvim/
 
-# Python
+# -- Python -----------------------------------------------------------------
 __pycache__/
-*.pyc
-*.pyo
+*.py[cod]
+*$py.class
 .venv/
 venv/
+.env/
+env/
+.python-version
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.pyre/
+.pytype/
+.pyright/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+*.egg-info/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+# uv
+.uv/
+# hatch / build
+dist/
+build-python/
 
-# Kotlin / Gradle
+# -- Kotlin / Gradle / JVM --------------------------------------------------
 .gradle/
 build/
 out/
 *.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+!**/gradle/wrapper/gradle-wrapper.jar
 local.properties
+hs_err_pid*.log
+replay_pid*.log
 
-# Node (for any future web visualization)
+# -- Node / Web -------------------------------------------------------------
 node_modules/
+.npm/
+.pnp.*
+.yarn/
+.vite/
+dist/
+out/
+build-web/
+.next/
+.react-router/
+.turbo/
+coverage/
+*.tsbuildinfo
+.eslintcache
+# React Router / Vite build artefacts
+apps/web/build/
+apps/web/.react-router/
+apps/web/playwright-report/
+apps/web/test-results/
+
+# -- Logs -------------------------------------------------------------------
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
 
-# Secrets (never commit)
+# -- Secrets (never commit) -------------------------------------------------
 .env
-.env.local
+.env.*
+!.env.example
 *.credentials.json
 *-creds.json
+*.pem
+*.key
 
-# Build artifacts
-dist/
-*.egg-info/
+# -- Databases (developer-local) --------------------------------------------
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+nsp-api.sqlite*
 
-# Claude local settings (user-level, not shared)
+# -- Benchmark artefacts local to a run -------------------------------------
+# (Baseline results under benchmarks/results/<name>/ are tracked; the bare
+#  top-level /tmp/ and scratch folders below are not.)
+benchmarks/results/*/tmp/
+benchmarks/results/*.tmp
+
+# -- MiniZinc compilation artefacts -----------------------------------------
+*.fzn
+*.ozn
+
+# -- Claude Code local state -----------------------------------------------
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
+.claude/memory/  # symlinked per-machine via tools/setup-memory-link.sh
+
+# -- QMD daemon local files ------------------------------------------------
+.qmd-local/
+*.qmd-cache

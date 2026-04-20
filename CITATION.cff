@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+type: software
+title: "cp-deep-dive: a practical introduction to Constraint Programming with OR-Tools CP-SAT"
+abstract: >
+  A long-form teaching repository that walks readers from first principles of
+  Constraint Programming to a full end-to-end Nurse Scheduling Problem (NSP)
+  application. Uses Google OR-Tools CP-SAT as the primary solver, in both
+  Python and Kotlin (via the companion `cpsat-kt` DSL), with MiniZinc as a
+  solver-agnostic modelling companion and ports to Timefold and Choco for
+  comparison.
+authors:
+  - family-names: "Petreski"
+    given-names: "Vanja"
+    email: "vanja@petreski.co"
+version: "0.1.0"
+date-released: "2026-04-20"
+license: "Apache-2.0"
+repository-code: "https://github.com/vpetreski/cp-deep-dive"
+keywords:
+  - "constraint programming"
+  - "constraint optimization"
+  - "CP-SAT"
+  - "OR-Tools"
+  - "Kotlin"
+  - "Python"
+  - "nurse scheduling problem"
+  - "operations research"
+  - "teaching"
+  - "MiniZinc"
+references:
+  - type: software
+    title: "Google OR-Tools"
+    authors:
+      - name: "Google"
+    url: "https://github.com/google/or-tools"
+    license: "Apache-2.0"
+  - type: software
+    title: "MiniZinc"
+    authors:
+      - name: "MiniZinc Team"
+    url: "https://github.com/MiniZinc/libminizinc"
+    license: "MPL-2.0"

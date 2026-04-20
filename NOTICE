@@ -1,0 +1,166 @@
+cp-deep-dive
+Copyright 2026 Vanja Petreski
+
+This product includes software developed as part of the cp-deep-dive learning
+project, licensed under the Apache License, Version 2.0 (see LICENSE).
+
+----------------------------------------------------------------------
+Third-party code and content used or relied upon by this project
+----------------------------------------------------------------------
+
+This repository relies on, references, and/or embeds documentation about the
+following third-party components. Each component remains under its own
+upstream license; the notices below are provided for attribution and to help
+downstream users comply with those licenses.
+
+Google OR-Tools CP-SAT
+    Upstream: https://github.com/google/or-tools
+    License:  Apache License 2.0
+    Used by:  libs/cpsat-kt/ (Kotlin DSL wrapper), apps/py-cp-sat/ (Python
+              bindings via `ortools` on PyPI), apps/kt-cp-sat/ (Java bindings
+              via `com.google.ortools:ortools-java`).
+
+MiniZinc
+    Upstream: https://github.com/MiniZinc/libminizinc
+    License:  Mozilla Public License 2.0
+    Used by:  apps/mzn/ (model files consumed by a MiniZinc toolchain
+              installed locally by the user).
+
+Kotlin
+    Upstream: https://github.com/JetBrains/kotlin
+    License:  Apache License 2.0
+    Used by:  libs/cpsat-kt/, apps/kt-cp-sat/, apps/kt-api/.
+
+kotlinx.coroutines
+    Upstream: https://github.com/Kotlin/kotlinx.coroutines
+    License:  Apache License 2.0
+    Used by:  libs/cpsat-kt/.
+
+Kotest
+    Upstream: https://github.com/kotest/kotest
+    License:  Apache License 2.0
+    Used by:  libs/cpsat-kt/ (test-only).
+
+Gradle
+    Upstream: https://github.com/gradle/gradle
+    License:  Apache License 2.0
+    Used by:  build systems in libs/cpsat-kt/, apps/kt-cp-sat/, apps/kt-api/.
+
+Python
+    Upstream: https://github.com/python/cpython
+    License:  Python Software Foundation License
+    Used by:  apps/py-cp-sat/, apps/py-api/.
+
+FastAPI
+    Upstream: https://github.com/fastapi/fastapi
+    License:  MIT License
+    Used by:  apps/py-api/.
+
+Pydantic
+    Upstream: https://github.com/pydantic/pydantic
+    License:  MIT License
+    Used by:  apps/py-api/.
+
+Uvicorn
+    Upstream: https://github.com/encode/uvicorn
+    License:  BSD 3-Clause License
+    Used by:  apps/py-api/.
+
+Ktor
+    Upstream: https://github.com/ktorio/ktor
+    License:  Apache License 2.0
+    Used by:  apps/kt-api/.
+
+pytest
+    Upstream: https://github.com/pytest-dev/pytest
+    License:  MIT License
+    Used by:  apps/py-cp-sat/, apps/py-api/ (test-only).
+
+Hypothesis
+    Upstream: https://github.com/HypothesisWorks/hypothesis
+    License:  Mozilla Public License 2.0
+    Used by:  apps/py-cp-sat/ (test-only).
+
+Ruff
+    Upstream: https://github.com/astral-sh/ruff
+    License:  MIT License
+    Used by:  apps/py-cp-sat/, apps/py-api/ (lint-only).
+
+uv
+    Upstream: https://github.com/astral-sh/uv
+    License:  Apache License 2.0 / MIT License (dual)
+    Used by:  apps/py-cp-sat/, apps/py-api/ (package-management tool).
+
+React
+    Upstream: https://github.com/facebook/react
+    License:  MIT License
+    Used by:  apps/web/.
+
+React Router
+    Upstream: https://github.com/remix-run/react-router
+    License:  MIT License
+    Used by:  apps/web/.
+
+Vite
+    Upstream: https://github.com/vitejs/vite
+    License:  MIT License
+    Used by:  apps/web/.
+
+TypeScript
+    Upstream: https://github.com/microsoft/TypeScript
+    License:  Apache License 2.0
+    Used by:  apps/web/, apps/shared/.
+
+Tailwind CSS
+    Upstream: https://github.com/tailwindlabs/tailwindcss
+    License:  MIT License
+    Used by:  apps/web/.
+
+shadcn/ui
+    Upstream: https://github.com/shadcn-ui/ui
+    License:  MIT License
+    Used by:  apps/web/.
+
+TanStack Query
+    Upstream: https://github.com/TanStack/query
+    License:  MIT License
+    Used by:  apps/web/.
+
+Node.js
+    Upstream: https://github.com/nodejs/node
+    License:  MIT License
+    Used by:  apps/web/, apps/shared/ (build-only).
+
+Timefold Solver
+    Upstream: https://github.com/TimefoldAI/timefold-solver
+    License:  Apache License 2.0
+    Used by:  apps/alt-solver/timefold/ (Chapter 18 ecosystem port).
+
+Choco Solver
+    Upstream: https://github.com/chocoteam/choco-solver
+    License:  BSD 4-Clause License
+    Used by:  apps/alt-solver/choco/ (Chapter 18 ecosystem port).
+
+NSPLib benchmark instances
+    Upstream: https://www.projectmanagement.ugent.be/research/personnel_scheduling/nsp
+    Note:     Benchmark data used for evaluation in Chapter 13; not
+              redistributed in this repository.
+
+INRC-I and INRC-II benchmark instances
+    Upstream: https://www.projectmanagement.ugent.be/research/personnel_scheduling/inrc
+              and https://mobiz.vives.be/inrc2/
+    Note:     Benchmark data used for evaluation in Chapter 13; not
+              redistributed in this repository.
+
+----------------------------------------------------------------------
+Documentation paraphrased or summarised in `docs/knowledge/`
+----------------------------------------------------------------------
+
+The reference notes in `docs/knowledge/` summarise concepts, APIs, and
+published research in the authors' own words. Direct quotations, code
+snippets reproduced from third-party documentation, and bibliographic
+references are attributed inline in those files.
+
+No part of this repository redistributes copyrighted text from upstream
+documentation or papers verbatim beyond short illustrative snippets
+permitted under fair use or the upstream licence.
