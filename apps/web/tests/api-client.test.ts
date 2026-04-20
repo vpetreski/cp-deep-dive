@@ -31,7 +31,7 @@ const server = setupServer(
   ),
   http.get(`${BASE}/solution/:jobId`, ({ params }) =>
     HttpResponse.json({
-      jobId: params.jobId,
+      jobId: params.jobId as string,
       status: "optimal",
       objective: 42,
       bestBound: 42,

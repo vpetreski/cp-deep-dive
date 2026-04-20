@@ -134,7 +134,7 @@ export default function SolveConfig() {
   const fallback: NspInstance | undefined = getExampleById(instanceId);
   const instance = instanceQuery.data ?? fallback;
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
       maxTimeSeconds: 60,
@@ -163,10 +163,9 @@ export default function SolveConfig() {
     },
   });
 
-  function onSubmit(values: FormValues) {
+  function onSubmit(values: FormOutput) {
     if (!instance) return;
-    const seed =
-      values.randomSeed === "" ? undefined : Number(values.randomSeed);
+    const seed = values.randomSeed;
     const body: SolveRequest = {
       instance,
       params: {
