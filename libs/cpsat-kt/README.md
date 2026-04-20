@@ -1,10 +1,19 @@
 # cpsat-kt
 
+[![Kotlin](https://img.shields.io/badge/kotlin-2.3%2B-7F52FF.svg)](https://kotlinlang.org/)
+[![JDK](https://img.shields.io/badge/JDK-25-orange.svg)](https://openjdk.org/projects/jdk/25/)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![Status](https://img.shields.io/badge/status-0.1.0%20--%20preview-yellow.svg)](./CHANGELOG.md)
+
 An idiomatic Kotlin DSL over [Google OR-Tools CP-SAT][or-tools].
 
 Build constraint-programming models with operator overloading, sealed types,
-coroutine-friendly solve entry points, and a proper Kotlin feel -- without
+coroutine-friendly solve entry points, and a proper Kotlin feel — without
 giving up any of CP-SAT's power.
+
+**Status:** v0.1.0 — 41/41 tests pass; API stable enough for learning and
+prototyping. Breaking changes may land before v1.0; see
+[CHANGELOG.md](./CHANGELOG.md).
 
 ```kotlin
 import io.vanja.cpsat.*
@@ -264,9 +273,21 @@ See `docs/knowledge/cpsat-kt/overview.md` in the parent repository. The
 0.1.x series is scoped to cover the CP-SAT surface exercised by chapters
 2-13 of the [cp-deep-dive learning project][project].
 
+## Contributing
+
+This library lives inside the [cp-deep-dive][project] learning project.
+Bug reports, design feedback, and PRs are welcome — see
+[CONTRIBUTING.md](../../CONTRIBUTING.md) in the parent repo for the dev
+loop, commit conventions, and Developer Certificate of Origin sign-off.
+
+## Citation
+
+If you use `cpsat-kt` in academic or public work, please cite the parent
+project via [CITATION.cff](../../CITATION.cff).
+
 ## License
 
-Apache 2.0 -- see [LICENSE](./LICENSE).
+Apache 2.0 — see [LICENSE](./LICENSE).
 
 [or-tools]: https://developers.google.com/optimization/cp/cp_solver
-[project]: https://github.com/vanjap/cp-deep-dive
+[project]: ../../
