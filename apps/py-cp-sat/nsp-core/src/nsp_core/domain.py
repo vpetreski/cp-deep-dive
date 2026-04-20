@@ -9,8 +9,7 @@ library so it can be imported from anywhere (ch11, ch12, ch13, py-api, tests).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from enum import Enum
-
+from enum import StrEnum
 
 # ---------------------------------------------------------------------------
 # Instance
@@ -155,7 +154,7 @@ class Schedule:
 # ---------------------------------------------------------------------------
 
 
-class SolveStatus(str, Enum):
+class SolveStatus(StrEnum):
     """Wire-compatible status enum (mirrors SolveResponse.status)."""
 
     PENDING = "pending"

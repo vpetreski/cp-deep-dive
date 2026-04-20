@@ -150,7 +150,7 @@ def validate_schedule(instance: Instance, schedule: Schedule) -> list[Violation]
                         )
 
     # --- HC-2: at most one shift per day per nurse ---
-    for nid, days in per_nurse.items():
+    for nid, _days in per_nurse.items():
         # per_nurse already dedups to one shift per day; double-check the raw
         # assignments list for duplicates.
         seen: dict[int, int] = defaultdict(int)

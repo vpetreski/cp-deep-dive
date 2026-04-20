@@ -14,10 +14,9 @@ from __future__ import annotations
 
 import pathlib
 
-from ortools.sat.python import cp_model
-
 from nsp_core import load_instance
 from nsp_core.model_v1 import build_model
+from ortools.sat.python import cp_model
 
 DATA = pathlib.Path(__file__).resolve().parents[6] / "data" / "nsp"
 

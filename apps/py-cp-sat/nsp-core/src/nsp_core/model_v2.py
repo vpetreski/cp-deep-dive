@@ -23,7 +23,8 @@ from dataclasses import dataclass
 from ortools.sat.python import cp_model
 
 from nsp_core.domain import Instance, ObjectiveWeights
-from nsp_core.model_v1 import ModelVars, build_model as build_hard_model
+from nsp_core.model_v1 import ModelVars
+from nsp_core.model_v1 import build_model as build_hard_model
 
 
 @dataclass

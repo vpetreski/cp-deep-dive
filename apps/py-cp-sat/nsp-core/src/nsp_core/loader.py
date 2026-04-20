@@ -23,6 +23,7 @@ from nsp_core.domain import (
     Shift,
 )
 
+
 def _discover_schema_path() -> pathlib.Path:
     """Locate apps/shared/schemas/nsp-instance.schema.json relative to this file.
 

@@ -40,9 +40,7 @@ def _cell_allowed(instance: Instance, nurse_id: str, day: int, shift_id: str) ->
     if day in nurse.unavailable:
         return False
     shift = instance.shift(shift_id)
-    if shift.skill is not None and shift.skill not in nurse.skills:
-        return False
-    return True
+    return not (shift.skill is not None and shift.skill not in nurse.skills)
 
 
 def build_model(
@@ -213,19 +211,20 @@ def build_model(
 
     # ---------- HC-6b: min/max shifts per week (per-nurse override) ----------
     for n in nurses:
-        if n.min_shifts_per_week is not None or n.max_shifts_per_week is not None:
-            if instance.horizon_days >= 7:
-                for d0 in range(instance.horizon_days - 6):
-                    slab_ms: list[cp_model.IntVar] = []
-                    for d in range(d0, d0 + 7):
-                        for s in shift_ids:
-                            v = x.get((n.id, d, s))
-                            if v is not None:
-                                slab_ms.append(v)
-                    if slab_ms:
-                        if n.min_shifts_per_week is not None:
-                            model.add(sum(slab_ms) >= n.min_shifts_per_week)
-                        if n.max_shifts_per_week is not None:
-                            model.add(sum(slab_ms) <= n.max_shifts_per_week)
+        if (
+            n.min_shifts_per_week is not None or n.max_shifts_per_week is not None
+        ) and instance.horizon_days >= 7:
+            for d0 in range(instance.horizon_days - 6):
+                slab_ms: list[cp_model.IntVar] = []
+                for d in range(d0, d0 + 7):
+                    for s in shift_ids:
+                        v = x.get((n.id, d, s))
+                        if v is not None:
+                            slab_ms.append(v)
+                if slab_ms:
+                    if n.min_shifts_per_week is not None:
+                        model.add(sum(slab_ms) >= n.min_shifts_per_week)
+                    if n.max_shifts_per_week is not None:
+                        model.add(sum(slab_ms) <= n.max_shifts_per_week)
 
     return model, ModelVars(x=x, instance=instance)

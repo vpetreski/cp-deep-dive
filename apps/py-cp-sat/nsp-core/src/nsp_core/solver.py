@@ -16,6 +16,7 @@ solutions. This is how the SSE streaming endpoint is fed.
 
 from __future__ import annotations
 
+import contextlib
 import datetime as dt
 from collections.abc import Callable
 from dataclasses import replace
@@ -32,8 +33,10 @@ from nsp_core.domain import (
     SolveStatus,
     Violation,
 )
-from nsp_core.model_v1 import ModelVars, build_model as build_hard_model
-from nsp_core.model_v2 import PenaltyTerms, build_model as build_soft_model
+from nsp_core.model_v1 import ModelVars
+from nsp_core.model_v1 import build_model as build_hard_model
+from nsp_core.model_v2 import PenaltyTerms
+from nsp_core.model_v2 import build_model as build_soft_model
 
 ProgressCallback = Callable[[SolveResult], None]
 
@@ -220,10 +223,8 @@ class _IncumbentRecorder(cp_model.CpSolverSolutionCallback):
             solve_time_seconds=self.wall_time,
             violations=violations,
         )
-        try:
+        with contextlib.suppress(Exception):  # don't let UI errors kill the solve
             self._callback(result)
-        except Exception:  # pragma: no cover - we don't let UI errors kill the solve
-            pass
 
 
 def solve(
@@ -323,10 +324,11 @@ def _solve_weighted(
         violations = _violations_from_terms(solver, terms, weights)
         obj_val = float(solver.objective_value)
         best_bound = float(solver.best_objective_bound)
-        if obj_val > 0:
-            gap = max(0.0, (obj_val - best_bound) / max(abs(obj_val), 1e-9))
-        else:
-            gap = 0.0
+        gap = (
+            max(0.0, (obj_val - best_bound) / max(abs(obj_val), 1e-9))
+            if obj_val > 0
+            else 0.0
+        )
         schedule = replace(schedule, violations=violations)
     return SolveResult(
         status=wire_status,
