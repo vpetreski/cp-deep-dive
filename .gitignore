@@ -112,6 +112,16 @@ benchmarks/results/*.tmp
 *.fzn
 *.ozn
 
+# -- Stray SQLite JDBC URL files from tests ---------------------------------
+# Some JDBC drivers (xerial sqlite-jdbc) create files named after URL fragments
+# like ":memory:?cache=shared" in the working directory during tests.
+:memory:*
+*.db
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+
 # -- Claude Code local state -----------------------------------------------
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
