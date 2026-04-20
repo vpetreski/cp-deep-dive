@@ -1,6 +1,7 @@
-"""Chapter 13 — NSP v3 — INRC-II benchmark-scale + tuning.
+"""Chapter 13 - NSP v3 - benchmark-scale + tuning.
 
-Stub. Open `docs/chapters/13-*.md` when the chapter is written.
+The chapter teaches how to read CP-SAT's search log, compare parameter sets
+on the same instance, and pick the single biggest win on your hardware.
 """
 
 from py_cp_sat_ch13.main import main

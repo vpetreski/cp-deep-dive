@@ -1,11 +1,12 @@
 [project]
 name = "py-cp-sat-ch11-nsp-v1"
 version = "0.1.0"
-description = "Chapter 11 — NSP v1 — toy instance, hard constraints only"
+description = "Chapter 11 — NSP v1 — toy instance, hard constraints only (HC-1..HC-8)"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ortools>=9.15",
+    "nsp-core",
 ]
 
 [build-system]

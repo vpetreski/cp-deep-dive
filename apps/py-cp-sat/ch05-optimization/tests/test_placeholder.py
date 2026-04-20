@@ -1,19 +1,13 @@
-"""Placeholder test for Chapter 05 — skipped until the chapter is implemented."""
+"""Smoke test for the Chapter 05 entry point."""
 
 from __future__ import annotations
 
-import pytest
 
-
-@pytest.mark.skip(reason="Chapter 05 not yet implemented — see docs/chapters/05-*.md")
-def test_placeholder() -> None:
-    """Stub. Real tests land with the chapter."""
-    raise AssertionError("should have been skipped")
-
-
-def test_main_raises_not_implemented() -> None:
-    """Until implemented, calling main() must raise NotImplementedError."""
+def test_main_runs_without_error(capsys) -> None:  # type: ignore[no-untyped-def]
+    """``python -m py_cp_sat_ch05`` prints both demos and exits cleanly."""
     from py_cp_sat_ch05.main import main
 
-    with pytest.raises(NotImplementedError):
-        main()
+    main()
+    captured = capsys.readouterr()
+    assert "0/1 Knapsack" in captured.out
+    assert "Bin Packing" in captured.out

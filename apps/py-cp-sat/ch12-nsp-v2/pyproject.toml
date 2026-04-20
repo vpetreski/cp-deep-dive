@@ -1,11 +1,13 @@
 [project]
 name = "py-cp-sat-ch12-nsp-v2"
 version = "0.1.0"
-description = "Chapter 12 — NSP v2 — soft constraints, preferences, fairness"
+description = "Chapter 12 — NSP v2 — soft constraints SC-1..SC-5 with weighted and lexicographic objectives"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ortools>=9.15",
+    "nsp-core",
+    "py-cp-sat-ch11-nsp-v1",
 ]
 
 [build-system]

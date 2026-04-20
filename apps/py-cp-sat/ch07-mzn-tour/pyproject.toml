@@ -1,0 +1,27 @@
+[project]
+name = "py-cp-sat-ch07-mzn-tour"
+version = "0.1.0"
+description = "Chapter 07 — MiniZinc tour — run shared models via subprocess and compare."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ortools>=9.15",
+    "py-cp-sat-ch04-puzzles",
+    "py-cp-sat-ch05-optimization",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/py_cp_sat_ch07"]
+
+[tool.uv.sources]
+py-cp-sat-ch04-puzzles = { workspace = true }
+py-cp-sat-ch05-optimization = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]

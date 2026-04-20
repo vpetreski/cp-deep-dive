@@ -1,19 +1,17 @@
-"""Placeholder test for Chapter 09 — skipped until the chapter is implemented."""
+"""Smoke test for Chapter 09."""
 
 from __future__ import annotations
 
-import pytest
+from pathlib import Path
 
 
-@pytest.mark.skip(reason="Chapter 09 not yet implemented — see docs/chapters/09-*.md")
-def test_placeholder() -> None:
-    """Stub. Real tests land with the chapter."""
-    raise AssertionError("should have been skipped")
-
-
-def test_main_raises_not_implemented() -> None:
-    """Until implemented, calling main() must raise NotImplementedError."""
+def test_main_runs_without_error(tmp_path: Path, capsys, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    monkeypatch.setenv("CH09_OUT_DIR", str(tmp_path))
     from py_cp_sat_ch09.main import main
 
-    with pytest.raises(NotImplementedError):
-        main()
+    main()
+    out = capsys.readouterr().out
+    assert "Job-shop 3x3" in out
+    assert "Gantt chart written to" in out
+    png = tmp_path / "ch09_5x4_gantt.png"
+    assert png.exists() and png.stat().st_size > 0

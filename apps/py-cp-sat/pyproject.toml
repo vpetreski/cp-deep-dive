@@ -21,14 +21,19 @@ members = [
     "ch04-puzzles",
     "ch05-optimization",
     "ch06-globals",
+    "ch07-mzn-tour",
+    "ch08-mzn-prototype",
     "ch09-jobshop",
     "ch10-shifts",
     "ch11-nsp-v1",
     "ch12-nsp-v2",
     "ch13-nsp-v3",
+    "nsp-core",
 ]
 
 [tool.uv.sources]
+nsp-core = { workspace = true }
+py-cp-sat-ch11-nsp-v1 = { workspace = true }
 
 [tool.ruff]
 target-version = "py312"
@@ -67,10 +72,13 @@ testpaths = [
     "ch04-puzzles/tests",
     "ch05-optimization/tests",
     "ch06-globals/tests",
+    "ch07-mzn-tour/tests",
+    "ch08-mzn-prototype/tests",
     "ch09-jobshop/tests",
     "ch10-shifts/tests",
     "ch11-nsp-v1/tests",
     "ch12-nsp-v2/tests",
     "ch13-nsp-v3/tests",
+    "nsp-core/tests",
 ]
 addopts = "-ra -q --import-mode=importlib"

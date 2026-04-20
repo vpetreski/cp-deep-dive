@@ -1,8 +1,11 @@
-"""Chapter 04 — Classic puzzles — N-Queens, SEND+MORE=MONEY, cryptarithmetic.
+"""Chapter 04 — Classic puzzles: N-Queens, SEND+MORE=MONEY, Sudoku.
 
-Stub. Open `docs/chapters/04-*.md` when the chapter is written.
+Submodules:
+    - ``n_queens`` — ``solve_n_queens`` + enumeration.
+    - ``send_more_money`` — the classic cryptarithm.
+    - ``sudoku`` — generic 9x9 solver with 27 AllDifferent constraints.
+
+Run the full chapter demo via ``python -m py_cp_sat_ch04``.
 """
 
-from py_cp_sat_ch04.main import main
-
-__all__ = ["main"]
+__all__: list[str] = []

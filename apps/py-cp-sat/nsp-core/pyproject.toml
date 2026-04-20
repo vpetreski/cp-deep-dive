@@ -1,0 +1,22 @@
+[project]
+name = "nsp-core"
+version = "0.1.0"
+description = "Shared NSP domain model, loader, CP-SAT solver, and schedule validator for the cp-deep-dive Python stack."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ortools>=9.15",
+    "jsonschema>=4.23",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nsp_core"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+]

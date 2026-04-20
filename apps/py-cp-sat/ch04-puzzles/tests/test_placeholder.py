@@ -1,19 +1,12 @@
-"""Placeholder test for Chapter 04 — skipped until the chapter is implemented."""
+"""Chapter 04 — smoke test that ``main()`` runs end-to-end."""
 
 from __future__ import annotations
 
-import pytest
+from py_cp_sat_ch04.main import solve
 
 
-@pytest.mark.skip(reason="Chapter 04 not yet implemented — see docs/chapters/04-*.md")
-def test_placeholder() -> None:
-    """Stub. Real tests land with the chapter."""
-    raise AssertionError("should have been skipped")
-
-
-def test_main_raises_not_implemented() -> None:
-    """Until implemented, calling main() must raise NotImplementedError."""
-    from py_cp_sat_ch04.main import main
-
-    with pytest.raises(NotImplementedError):
-        main()
+def test_main_runs_without_error() -> None:
+    demo = solve()
+    assert demo.n_queens.status in {"OPTIMAL", "FEASIBLE"}
+    assert demo.send_more.status in {"OPTIMAL", "FEASIBLE"}
+    assert demo.sudoku.status in {"OPTIMAL", "FEASIBLE"}

@@ -1,12 +1,6 @@
-"""FastAPI backend for the NSP app.
+"""FastAPI backend for the Nurse Scheduling Problem app.
 
-Implemented endpoints (Phase 0 scaffolding):
-- GET /health
-- GET /version
-
-Stub endpoints (flag Phase 7 Chapter 15 work):
-- POST /solve
-- GET  /solution/{id}
+See ``py_api.main`` for the ASGI entrypoint (``app``).
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"

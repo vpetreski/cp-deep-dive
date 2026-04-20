@@ -1,101 +1,103 @@
-"""FastAPI entrypoint for the NSP backend skeleton."""
+"""FastAPI ASGI entrypoint for py-api.
+
+Composes the app:
+  - settings, metrics, database, solver pool attached to ``app.state``
+  - request-id + CORS middleware
+  - error handlers
+  - routers (meta, instances, solve)
+  - startup seeding + graceful shutdown
+
+Run: ``uv run uvicorn py_api.main:app --reload``
+"""
 
 from __future__ import annotations
 
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
 
-from py_api import __version__
+from py_api import __version__, errors
+from py_api.config import Settings
+from py_api.db import Database
+from py_api.jobs import DbJobWriter, SolvePool
+from py_api.logging_setup import RequestIdMiddleware, setup_logging
+from py_api.metrics import Metrics
+from py_api.routes import instances as instances_routes
+from py_api.routes import meta as meta_routes
+from py_api.routes import solve as solve_routes
+from py_api.startup import seed_instances
+
+log = logging.getLogger("py_api.main")
 
 
-def _ortools_version() -> str:
-    """Best-effort probe of the installed OR-Tools version.
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    settings: Settings = app.state.settings
+    metrics = Metrics()
+    db = Database(settings.db_url)
+    await db.create_all()
+    pool = SolvePool(
+        metrics=metrics,
+        max_concurrent=settings.solve_concurrency,
+        event_cap=settings.sse_event_cap,
+    )
+    pool.bind_db_writer(DbJobWriter(db))
+    app.state.metrics = metrics
+    app.state.db = db
+    app.state.solve_pool = pool
 
-    The `ortools` wheels ship a version via `ortools.init.python.init.OrToolsVersion`
-    starting in 9.x; fall back to `importlib.metadata`.
-    """
+    await seed_instances(db, settings)
+    log.info(
+        "py-api started version=%s pool=%d db=%s",
+        __version__,
+        settings.solve_concurrency,
+        settings.db_url,
+    )
+
     try:
-        from importlib.metadata import version as _pkg_version
-
-        return _pkg_version("ortools")
-    except Exception:  # pragma: no cover - defensive fallback
-        return "unknown"
-
-
-app = FastAPI(
-    title="cp-deep-dive py-api",
-    version=__version__,
-    description="FastAPI backend for the Nurse Scheduling Problem (Phase 7 / Chapter 15).",
-)
+        yield
+    finally:
+        log.info("py-api shutdown — cancelling in-flight solves")
+        await pool.shutdown()
+        await db.dispose()
 
 
-# -- schemas -----------------------------------------------------------------
+def create_app(settings: Settings | None = None) -> FastAPI:
+    """Factory — useful for tests that want a fresh isolated app."""
+    settings = settings or Settings.from_env()
+    setup_logging()
 
-
-class HealthResponse(BaseModel):
-    """GET /health body."""
-
-    model_config = {"json_schema_extra": {"examples": [{"status": "ok", "service": "py-api"}]}}
-
-    status: str
-    service: str
-
-
-class VersionResponse(BaseModel):
-    """GET /version body."""
-
-    version: str
-    ortools: str
-
-
-class NotImplementedResponse(BaseModel):
-    """Shape of 501 stubs until Phase 7 ships."""
-
-    todo: str
-
-
-# -- endpoints ---------------------------------------------------------------
-
-
-@app.get("/health", response_model=HealthResponse, tags=["meta"])
-def health() -> HealthResponse:
-    """Liveness probe."""
-    return HealthResponse(status="ok", service="py-api")
-
-
-@app.get("/version", response_model=VersionResponse, tags=["meta"])
-def version() -> VersionResponse:
-    """Report the app version + the CP-SAT engine version."""
-    return VersionResponse(version=__version__, ortools=_ortools_version())
-
-
-@app.post(
-    "/solve",
-    status_code=501,
-    response_model=NotImplementedResponse,
-    tags=["nsp"],
-    summary="Submit an NSP instance for solving (not yet implemented).",
-)
-def solve() -> JSONResponse:
-    """Stub — wiring lands in Phase 7 / Chapter 15."""
-    return JSONResponse(
-        status_code=501,
-        content={"todo": "Phase 7 Chapter 15"},
+    app = FastAPI(
+        title="cp-deep-dive NSP API",
+        version=__version__,
+        description=(
+            "FastAPI backend for the Nurse Scheduling Problem. "
+            "Matches apps/shared/openapi.yaml v1.0."
+        ),
+        lifespan=lifespan,
     )
+    app.state.settings = settings
 
-
-@app.get(
-    "/solution/{solution_id}",
-    status_code=501,
-    response_model=NotImplementedResponse,
-    tags=["nsp"],
-    summary="Fetch a solved/in-progress schedule by id (not yet implemented).",
-)
-def solution(solution_id: str) -> JSONResponse:
-    """Stub — wiring lands in Phase 7 / Chapter 15."""
-    del solution_id  # unused until implemented
-    return JSONResponse(
-        status_code=501,
-        content={"todo": "Phase 7 Chapter 15"},
+    # Middleware — order matters: CORS outermost, then request-id.
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=list(settings.cors_origins),
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Idempotency-Key", "X-Request-Id"],
+        max_age=600,
     )
+    app.add_middleware(RequestIdMiddleware)
+
+    errors.install(app)
+
+    app.include_router(meta_routes.router)
+    app.include_router(instances_routes.router)
+    app.include_router(solve_routes.router)
+
+    return app
+
+
+app = create_app()
