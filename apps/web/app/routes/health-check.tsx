@@ -1,6 +1,10 @@
 import { Link } from "react-router";
 import { useQuery } from "@tanstack/react-query";
+import { RefreshCwIcon } from "lucide-react";
+
 import type { Route } from "./+types/health-check";
+import { AppShell } from "~/components/app-shell";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -9,12 +13,12 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { BackendSwitch } from "~/components/backend-switch";
-import { useBackend } from "~/lib/backend";
+import { useApi, useBackend } from "~/lib/backend";
+import { queryKeys } from "~/lib/query-keys";
 
 export function meta(_: Route.MetaArgs) {
   return [
-    { title: "Health check · cp-deep-dive" },
+    { title: "Health check — NSP Scheduler" },
     {
       name: "description",
       content: "Pings the configured backend's /health endpoint.",
@@ -22,122 +26,162 @@ export function meta(_: Route.MetaArgs) {
   ];
 }
 
-interface HealthPayload {
-  status?: string;
-  service?: string;
-  [key: string]: unknown;
-}
-
-async function fetchHealth(baseUrl: string): Promise<HealthPayload> {
-  const res = await fetch(`${baseUrl.replace(/\/$/, "")}/health`, {
-    headers: { Accept: "application/json" },
-  });
-  if (!res.ok) {
-    throw new Error(`HTTP ${res.status} ${res.statusText}`);
-  }
-  return (await res.json()) as HealthPayload;
-}
-
 export default function HealthCheck() {
   const { backend, baseUrl } = useBackend();
+  const api = useApi();
 
-  const query = useQuery({
-    queryKey: ["health", backend, baseUrl],
-    queryFn: () => fetchHealth(baseUrl),
-    enabled: typeof window !== "undefined", // client-only fetch
+  const healthQuery = useQuery({
+    queryKey: queryKeys.health(backend, baseUrl),
+    queryFn: ({ signal }) => api.getHealth(signal),
+    enabled: typeof window !== "undefined",
+    retry: false,
+  });
+  const versionQuery = useQuery({
+    queryKey: queryKeys.version(backend, baseUrl),
+    queryFn: ({ signal }) => api.getVersion(signal),
+    enabled: typeof window !== "undefined",
+    retry: false,
   });
 
+  const pending = healthQuery.isPending || healthQuery.isFetching;
+
   return (
-    <main className="min-h-dvh bg-background text-foreground">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8 px-6 py-16">
-        <header className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
-              Diagnostics
-            </span>
-            <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-              Backend health check
-            </h1>
-          </div>
-          <BackendSwitch />
+    <AppShell>
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+        <header className="flex flex-col gap-1">
+          <span className="text-xs font-medium tracking-widest text-muted-foreground uppercase">
+            Diagnostics
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Backend health check
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Active backend: <strong>{backend}</strong>. Configure URLs via{" "}
+            <code className="font-mono text-xs">VITE_PY_API_URL</code> and{" "}
+            <code className="font-mono text-xs">VITE_KT_API_URL</code>.
+          </p>
         </header>
 
         <Card>
           <CardHeader>
-            <CardTitle>
-              GET {baseUrl}/health
+            <CardTitle className="flex items-center gap-2 text-base">
+              GET <span className="font-mono">{baseUrl}/health</span>
+              <StatusPill
+                pending={pending}
+                error={healthQuery.isError}
+                ok={healthQuery.isSuccess}
+              />
             </CardTitle>
             <CardDescription>
-              Active backend: <strong>{backend}</strong>. Configure URLs via{" "}
-              <code>VITE_PY_API_URL</code> and <code>VITE_KT_API_URL</code>.
+              This route is a lightweight connectivity probe. It does not
+              require a database or solver worker to be up.
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+          <CardContent className="flex flex-col gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 type="button"
-                onClick={() => query.refetch()}
-                disabled={query.isFetching}
+                onClick={() => {
+                  void healthQuery.refetch();
+                  void versionQuery.refetch();
+                }}
+                disabled={pending}
               >
-                {query.isFetching ? "Checking…" : "Refresh"}
+                <RefreshCwIcon className={pending ? "animate-spin" : undefined} />
+                Refresh
               </Button>
               <Button asChild variant="ghost">
                 <Link to="/">Back to home</Link>
               </Button>
-              <StatusBadge
-                pending={query.isPending || query.isFetching}
-                error={query.isError}
-              />
             </div>
 
             <pre className="max-h-96 overflow-auto rounded-md border border-border bg-muted/50 p-4 text-xs leading-relaxed">
-              {renderBody(query.data, query.error, query.isPending)}
+              {renderBody({
+                data: healthQuery.data,
+                error: healthQuery.error,
+                pending,
+              })}
+            </pre>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              GET <span className="font-mono">{baseUrl}/version</span>
+            </CardTitle>
+            <CardDescription>
+              Backend build metadata — service name, version, OR-Tools version.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <pre className="max-h-60 overflow-auto rounded-md border border-border bg-muted/50 p-4 text-xs leading-relaxed">
+              {renderBody({
+                data: versionQuery.data,
+                error: versionQuery.error,
+                pending: versionQuery.isPending || versionQuery.isFetching,
+              })}
             </pre>
           </CardContent>
         </Card>
       </div>
-    </main>
+    </AppShell>
   );
 }
 
-function StatusBadge({
+function StatusPill({
   pending,
   error,
+  ok,
 }: {
   pending: boolean;
   error: boolean;
+  ok: boolean;
 }) {
-  const tone = pending
-    ? "bg-muted text-muted-foreground"
-    : error
-      ? "bg-destructive/10 text-destructive"
-      : "bg-primary/10 text-primary";
-  const label = pending ? "pending" : error ? "error" : "ok";
-  return (
-    <span
-      className={`inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium ${tone}`}
-    >
-      {label}
-    </span>
-  );
+  if (pending) {
+    return (
+      <Badge variant="outline" className="font-mono text-[10px] uppercase">
+        pending
+      </Badge>
+    );
+  }
+  if (error) {
+    return (
+      <Badge variant="destructive" className="font-mono text-[10px] uppercase">
+        error
+      </Badge>
+    );
+  }
+  if (ok) {
+    return (
+      <Badge className="bg-emerald-500/15 text-emerald-700 font-mono text-[10px] uppercase dark:text-emerald-300">
+        ok
+      </Badge>
+    );
+  }
+  return null;
 }
 
-function renderBody(
-  data: HealthPayload | undefined,
-  error: unknown,
-  pending: boolean,
-): string {
+function renderBody({
+  data,
+  error,
+  pending,
+}: {
+  data: unknown;
+  error: unknown;
+  pending: boolean;
+}): string {
   if (pending) return "Fetching…";
   if (error) {
     const msg =
       error instanceof Error ? error.message : String(error);
     return [
       "// Request failed.",
-      "// The backend is not up yet — this is expected during Phase 7 scaffolding.",
+      "// If the backend isn't running yet, start the Python or Kotlin server.",
       "",
       msg,
     ].join("\n");
   }
-  if (!data) return "// no data";
+  if (data === undefined) return "// no data";
   return JSON.stringify(data, null, 2);
 }
