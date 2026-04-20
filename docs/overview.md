@@ -52,7 +52,18 @@ Deep-dive notes already in the repo (indexed by QMD — ask about any topic and 
 
 ## Current status
 
-Phase 0 (setup + research) complete. **Plan v0.2** in [`plan.md`](plan.md) with Vanja's stack choices folded in — awaiting final green-light before Claude scaffolds all artifacts (`libs/cpsat-kt/`, `specs/nsp-app/`, `apps/*/`, chapter docs). After green-light, Vanja works chapter-by-chapter from [`../README.md`](../README.md).
+**Phase 0.5 — Full scaffold: ✅ Complete.** Everything is in place:
+
+- `libs/cpsat-kt/` v0.1.0 (41/41 tests pass) — the idiomatic Kotlin DSL library.
+- `apps/py-cp-sat/` (uv workspace, ch02 runs, ch04–ch13 stubs) + `apps/py-api/` (FastAPI).
+- `apps/kt-cp-sat/` (Gradle composite, ch02 runs raw-Java for pain demo) + `apps/kt-api/` (Ktor 3).
+- `apps/web/` (Vite 8 + React 19 + RR7 framework mode + Tailwind 4 + shadcn/ui + TanStack Query 5) — build/test/lint all green.
+- `apps/shared/openapi.yaml` + JSON schemas (validated against 2020-12).
+- `specs/nsp-app/` 10-file skeleton (unlocked; filled in Chapter 14).
+- All 18 chapter MDs under `docs/chapters/` — teaching-ladder structure (intuition → formal → Python → Kotlin → MiniZinc → exercises).
+- 4 ADRs (`docs/adr/`), GitHub Actions CI, `data/nsp/` (toy-01, toy-02), `benchmarks/` folder, `alt-solver/` stubs.
+
+**Phase 1 is open.** Start at [`chapters/01-what-is-cp.md`](chapters/01-what-is-cp.md).
 
 ## Key external references
 

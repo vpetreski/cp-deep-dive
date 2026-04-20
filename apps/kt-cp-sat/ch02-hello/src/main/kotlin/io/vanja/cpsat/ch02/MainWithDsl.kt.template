@@ -1,0 +1,36 @@
+package io.vanja.cpsat.ch02
+
+/*
+ * This file is a TEMPLATE (note the .template extension) — not compiled.
+ * It shows the same program as Main.kt, rewritten with `cpsat-kt` for
+ * contrast. Rename to MainWithDsl.kt and set this as mainClass to run it.
+ */
+
+/*
+import io.vanja.cpsat.*
+
+fun main() {
+    val model = cpModel {
+        val x = intVar("x", 0..10)
+        val y = intVar("y", 0..10)
+
+        constraint {
+            +(3 * x + 2 * y eq 12)
+            +(x + y le 5)
+        }
+    }
+
+    when (val res = model.solveBlocking { randomSeed = 42 }) {
+        is SolveResult.Optimal  -> println("Found: obj=${res.objective}")
+        is SolveResult.Feasible -> println("Feasible (gap=${res.gap})")
+        SolveResult.Infeasible  -> println("Infeasible.")
+        SolveResult.Unknown     -> println("Unknown.")
+        is SolveResult.ModelInvalid -> println("Invalid: ${res.message}")
+    }
+}
+*/
+
+// Word count (roughly):
+//   Main.kt (raw):      ~50 lines of imperative builder code.
+//   MainWithDsl.kt:     ~15 lines of declarative model + operator-overloaded
+//                       math + a sealed when-clause for the result.

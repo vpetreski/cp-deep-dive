@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cp-deep-dive.local/data/nsp/schema.json",
+  "title": "NSP instance",
+  "description": "Schema for a Nurse Scheduling Problem instance as consumed by the cp-deep-dive py-cp-sat and py-api projects.",
+  "type": "object",
+  "required": [
+    "horizonDays",
+    "shifts",
+    "nurses",
+    "demand",
+    "forbiddenTransitions",
+    "minRestHours",
+    "maxConsecutiveWorkingDays"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "horizonDays": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of calendar days in the planning horizon (0-indexed inside the instance)."
+    },
+    "shifts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/shift"}
+    },
+    "nurses": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/nurse"}
+    },
+    "demand": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/demandEntry"}
+    },
+    "forbiddenTransitions": {
+      "type": "array",
+      "description": "Pairs [s1, s2]: shift s1 on day d followed by shift s2 on day d+1 is illegal (used for rest enforcement).",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {"type": "string"}
+      }
+    },
+    "minRestHours": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Minimum rest between consecutive shifts, in hours. EU Working Time Directive baseline = 11."
+    },
+    "maxConsecutiveWorkingDays": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Upper bound on consecutive days any nurse can work."
+    },
+    "preferences": {
+      "type": "array",
+      "description": "Soft constraints — each entry nudges the objective. Ignored by hard-only solvers (ch. 11).",
+      "items": {"$ref": "#/$defs/preference"}
+    },
+    "fixedOff": {
+      "type": "array",
+      "description": "Hard day-off lock: nurse must not work on the given day.",
+      "items": {"$ref": "#/$defs/fixedOff"}
+    }
+  },
+  "$defs": {
+    "hhmm": {
+      "type": "string",
+      "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+      "description": "Time-of-day in 24h HH:MM format."
+    },
+    "shift": {
+      "type": "object",
+      "required": ["id", "name", "start", "end"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "start": {"$ref": "#/$defs/hhmm"},
+        "end": {"$ref": "#/$defs/hhmm"}
+      }
+    },
+    "nurse": {
+      "type": "object",
+      "required": ["id", "name", "skills", "contractHoursPerWeek"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1},
+        "skills": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1}
+        },
+        "contractHoursPerWeek": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 80
+        }
+      }
+    },
+    "demandEntry": {
+      "type": "object",
+      "required": ["day", "shiftId", "min", "max"],
+      "additionalProperties": false,
+      "properties": {
+        "day": {"type": "integer", "minimum": 0},
+        "shiftId": {"type": "string", "minLength": 1},
+        "min": {"type": "integer", "minimum": 0},
+        "max": {"type": "integer", "minimum": 0},
+        "requiredSkills": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "default": []
+        }
+      }
+    },
+    "preference": {
+      "type": "object",
+      "required": ["nurseId", "day", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "nurseId": {"type": "string", "minLength": 1},
+        "day": {"type": "integer", "minimum": 0},
+        "shiftId": {
+          "type": ["string", "null"],
+          "description": "null = preference about a day-off; string = preference about a specific shift."
+        },
+        "weight": {
+          "type": "integer",
+          "description": "Positive = nurse WANTS it. Negative = nurse AVOIDS it."
+        }
+      }
+    },
+    "fixedOff": {
+      "type": "object",
+      "required": ["nurseId", "day"],
+      "additionalProperties": false,
+      "properties": {
+        "nurseId": {"type": "string", "minLength": 1},
+        "day": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

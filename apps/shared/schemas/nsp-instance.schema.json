@@ -1,0 +1,184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cp-deep-dive.dev/schemas/nsp-instance.schema.json",
+  "title": "NspInstance",
+  "description": "A single Nurse Scheduling Problem instance. Stable across toy and benchmark sources; aligned with the in-repo toy schema at data/nsp/schema.json.",
+  "type": "object",
+  "required": ["id", "horizonDays", "shifts", "nurses", "coverage"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this instance (e.g. 'toy-01', 'inrc2-n030w4-0-8-9-6-4-8-2-2').",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "description": "Human-readable name."
+    },
+    "source": {
+      "type": "string",
+      "description": "Origin of the instance ('toy', 'nsplib', 'inrc1', 'inrc2', 'custom').",
+      "enum": ["toy", "nsplib", "inrc1", "inrc2", "custom"]
+    },
+    "horizonDays": {
+      "type": "integer",
+      "description": "Number of days in the planning horizon (0..horizonDays-1).",
+      "minimum": 1
+    },
+    "shifts": {
+      "type": "array",
+      "description": "Shift types that a nurse can work. An off-day is the absence of any shift.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Shift" }
+    },
+    "nurses": {
+      "type": "array",
+      "description": "Nurses available to be scheduled.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Nurse" }
+    },
+    "coverage": {
+      "type": "array",
+      "description": "Required number of nurses per (day, shift) cell.",
+      "items": { "$ref": "#/$defs/CoverageRequirement" }
+    },
+    "forbiddenTransitions": {
+      "type": "array",
+      "description": "Ordered (shiftA -> shiftB) pairs that may not occur on consecutive days. Example: ['N','M'] forbids a morning after a night.",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Free-form per-instance metadata (loader version, benchmark tag, etc.).",
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "Shift": {
+      "type": "object",
+      "required": ["id", "label"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable shift identifier (e.g. 'M', 'E', 'N', 'D').",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable shift name (e.g. 'Morning')."
+        },
+        "startMinutes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1439,
+          "description": "Local-time start minute of the shift (0..1439)."
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Shift duration in minutes."
+        },
+        "skill": {
+          "type": "string",
+          "description": "Required skill tag, if any."
+        }
+      }
+    },
+    "Nurse": {
+      "type": "object",
+      "required": ["id"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Skill tags the nurse holds."
+        },
+        "maxShiftsPerWeek": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "minShiftsPerWeek": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maxConsecutiveWorkingDays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "preferences": {
+          "type": "array",
+          "description": "Soft preferences — positive weight = desire, negative = avoidance.",
+          "items": { "$ref": "#/$defs/Preference" }
+        },
+        "unavailable": {
+          "type": "array",
+          "description": "Day indices (0..horizonDays-1) on which the nurse cannot be assigned any shift.",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "CoverageRequirement": {
+      "type": "object",
+      "required": ["day", "shiftId", "required"],
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shiftId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Exact (or minimum, depending on solver config) number of nurses for this cell."
+        },
+        "skill": {
+          "type": "string",
+          "description": "If present, the coverage must be filled by nurses holding this skill."
+        }
+      }
+    },
+    "Preference": {
+      "type": "object",
+      "required": ["day", "shiftId", "weight"],
+      "additionalProperties": false,
+      "properties": {
+        "day": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shiftId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "weight": {
+          "type": "integer",
+          "description": "Positive = nurse wants this cell; negative = nurse wants to avoid it."
+        }
+      }
+    }
+  }
+}

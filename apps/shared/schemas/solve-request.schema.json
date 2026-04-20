@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cp-deep-dive.dev/schemas/solve-request.schema.json",
+  "title": "SolveRequest",
+  "description": "Payload for POST /solve. Submits an instance plus optional solver parameters.",
+  "type": "object",
+  "required": ["instance"],
+  "additionalProperties": false,
+  "properties": {
+    "instance": {
+      "$ref": "nsp-instance.schema.json"
+    },
+    "params": {
+      "$ref": "#/$defs/SolverParams"
+    }
+  },
+  "$defs": {
+    "SolverParams": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxTimeSeconds": {
+          "type": "number",
+          "description": "Soft wall-clock budget for the solve in seconds.",
+          "exclusiveMinimum": 0
+        },
+        "numSearchWorkers": {
+          "type": "integer",
+          "description": "CP-SAT workers (maps to num_search_workers).",
+          "minimum": 0
+        },
+        "randomSeed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "linearizationLevel": {
+          "type": "integer",
+          "description": "CP-SAT linearization level (0..2).",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "enableHints": {
+          "type": "boolean",
+          "description": "Whether to pass any provided solution hints to CP-SAT."
+        }
+      }
+    }
+  }
+}

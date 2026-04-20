@@ -1,0 +1,10 @@
+[versions]
+# Keep in lockstep with libs/cpsat-kt/gradle/libs.versions.toml.
+kotlin = "2.3.20"
+cpsat-kt = "0.1.0"
+
+[libraries]
+cpsat-kt = { module = "io.vanja:cpsat-kt", version.ref = "cpsat-kt" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cp-deep-dive.dev/schemas/solve-response.schema.json",
+  "title": "SolveResponse",
+  "description": "Result payload for GET /solution/{jobId}. The schedule is present only for Feasible or Optimal outcomes.",
+  "type": "object",
+  "required": ["jobId", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "jobId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "running",
+        "feasible",
+        "optimal",
+        "infeasible",
+        "unknown",
+        "modelInvalid",
+        "error"
+      ]
+    },
+    "schedule": {
+      "$ref": "schedule.schema.json"
+    },
+    "objective": {
+      "type": "number",
+      "description": "Current best objective value (if an objective is defined)."
+    },
+    "bestBound": {
+      "type": "number",
+      "description": "Current best bound from the solver."
+    },
+    "gap": {
+      "type": "number",
+      "description": "Relative optimality gap ((objective - bestBound) / max(1, objective)). Null for infeasible/unknown."
+    },
+    "solveTimeSeconds": {
+      "type": "number",
+      "minimum": 0
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message for status = 'error' or 'modelInvalid'."
+    }
+  }
+}

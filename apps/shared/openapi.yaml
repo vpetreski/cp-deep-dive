@@ -1,0 +1,424 @@
+openapi: 3.1.0
+info:
+  title: cp-deep-dive NSP API
+  version: 0.1.0
+  summary: Nurse Scheduling Problem service contract.
+  description: |
+    Shared contract implemented identically by `apps/py-api/` (FastAPI) and
+    `apps/kt-api/` (Ktor 3). This is a stub — the full contract is finalized in
+    Chapter 14 (`specs/nsp-app/`) and locked before Phase 7 implementation.
+  license:
+    name: Apache-2.0
+    identifier: Apache-2.0
+servers:
+  - url: http://localhost:8000
+    description: Python (FastAPI) backend — default Phase 7 dev port.
+  - url: http://localhost:8080
+    description: Kotlin (Ktor 3) backend — default Phase 7 dev port.
+tags:
+  - name: meta
+    description: Service health + version.
+  - name: solve
+    description: Submit and retrieve NSP solves.
+
+paths:
+  /health:
+    get:
+      tags: [meta]
+      summary: Liveness probe.
+      operationId: getHealth
+      responses:
+        "200":
+          description: Service is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              examples:
+                python:
+                  value:
+                    status: ok
+                    service: py-api
+                kotlin:
+                  value:
+                    status: ok
+                    service: kt-api
+
+  /version:
+    get:
+      tags: [meta]
+      summary: Runtime + solver version.
+      operationId: getVersion
+      responses:
+        "200":
+          description: Version payload.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionResponse"
+
+  /solve:
+    post:
+      tags: [solve]
+      summary: Submit an instance for solving.
+      operationId: postSolve
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SolveRequest"
+      responses:
+        "202":
+          description: Job accepted; poll /solution/{jobId} or subscribe to /solutions/{jobId}/stream.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolveAccepted"
+        "400":
+          description: Invalid instance or parameters.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /solution/{jobId}:
+    get:
+      tags: [solve]
+      summary: Fetch the latest solution for a job.
+      operationId: getSolution
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Solution payload (may be partial for running jobs).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SolveResponse"
+        "404":
+          description: No such job.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /solutions/{jobId}/stream:
+    get:
+      tags: [solve]
+      summary: Server-Sent Events stream of incremental solutions.
+      description: |
+        Emits `Solution` events with the current best schedule, objective, and
+        bound. Terminates when the solve finishes (optimal, infeasible, or timed
+        out). Events use the `text/event-stream` Content-Type.
+      operationId: streamSolutions
+      parameters:
+        - in: path
+          name: jobId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: SSE stream of Solution events.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: |
+                  Each event is a JSON-encoded `SolveResponse` payload, prefixed
+                  by `event: solution\ndata: ...`.
+        "404":
+          description: No such job.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required: [status, service]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+          description: Short service identifier ('py-api' or 'kt-api').
+
+    VersionResponse:
+      type: object
+      required: [version, ortools]
+      properties:
+        version:
+          type: string
+          description: API version (semver).
+        ortools:
+          type: string
+          description: OR-Tools CP-SAT version in use.
+        runtime:
+          type: string
+          description: Runtime identifier (e.g. 'python 3.12.7', 'openjdk 25').
+
+    SolveAccepted:
+      type: object
+      required: [jobId]
+      properties:
+        jobId:
+          type: string
+          minLength: 1
+
+    Error:
+      type: object
+      required: [message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    SolverParams:
+      type: object
+      properties:
+        maxTimeSeconds:
+          type: number
+          exclusiveMinimum: 0
+        numSearchWorkers:
+          type: integer
+          minimum: 0
+        randomSeed:
+          type: integer
+          minimum: 0
+        linearizationLevel:
+          type: integer
+          minimum: 0
+          maximum: 2
+        enableHints:
+          type: boolean
+
+    NspInstance:
+      type: object
+      required: [id, horizonDays, shifts, nurses, coverage]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        name:
+          type: string
+        source:
+          type: string
+          enum: [toy, nsplib, inrc1, inrc2, custom]
+        horizonDays:
+          type: integer
+          minimum: 1
+        shifts:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Shift"
+        nurses:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Nurse"
+        coverage:
+          type: array
+          items:
+            $ref: "#/components/schemas/CoverageRequirement"
+        forbiddenTransitions:
+          type: array
+          items:
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: string
+        metadata:
+          type: object
+          additionalProperties: true
+
+    Shift:
+      type: object
+      required: [id, label]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        label:
+          type: string
+        startMinutes:
+          type: integer
+          minimum: 0
+          maximum: 1439
+        durationMinutes:
+          type: integer
+          minimum: 1
+        skill:
+          type: string
+
+    Nurse:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          minLength: 1
+        name:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+          uniqueItems: true
+        maxShiftsPerWeek:
+          type: integer
+          minimum: 0
+        minShiftsPerWeek:
+          type: integer
+          minimum: 0
+        maxConsecutiveWorkingDays:
+          type: integer
+          minimum: 1
+        preferences:
+          type: array
+          items:
+            $ref: "#/components/schemas/Preference"
+        unavailable:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+          uniqueItems: true
+
+    CoverageRequirement:
+      type: object
+      required: [day, shiftId, required]
+      properties:
+        day:
+          type: integer
+          minimum: 0
+        shiftId:
+          type: string
+          minLength: 1
+        required:
+          type: integer
+          minimum: 0
+        skill:
+          type: string
+
+    Preference:
+      type: object
+      required: [day, shiftId, weight]
+      properties:
+        day:
+          type: integer
+          minimum: 0
+        shiftId:
+          type: string
+          minLength: 1
+        weight:
+          type: integer
+
+    SolveRequest:
+      type: object
+      required: [instance]
+      properties:
+        instance:
+          $ref: "#/components/schemas/NspInstance"
+        params:
+          $ref: "#/components/schemas/SolverParams"
+
+    Schedule:
+      type: object
+      required: [instanceId, assignments]
+      properties:
+        instanceId:
+          type: string
+          minLength: 1
+        generatedAt:
+          type: string
+          format: date-time
+        assignments:
+          type: array
+          items:
+            $ref: "#/components/schemas/Assignment"
+        violations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Violation"
+
+    Assignment:
+      type: object
+      required: [nurseId, day]
+      properties:
+        nurseId:
+          type: string
+          minLength: 1
+        day:
+          type: integer
+          minimum: 0
+        shiftId:
+          oneOf:
+            - type: string
+              minLength: 1
+            - type: "null"
+
+    Violation:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          enum: [hard, soft]
+        nurseId:
+          type: string
+        day:
+          type: integer
+          minimum: 0
+        penalty:
+          type: number
+
+    SolveResponse:
+      type: object
+      required: [jobId, status]
+      properties:
+        jobId:
+          type: string
+          minLength: 1
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - feasible
+            - optimal
+            - infeasible
+            - unknown
+            - modelInvalid
+            - error
+        schedule:
+          $ref: "#/components/schemas/Schedule"
+        objective:
+          type: number
+        bestBound:
+          type: number
+        gap:
+          type: number
+        solveTimeSeconds:
+          type: number
+          minimum: 0
+        error:
+          type: string

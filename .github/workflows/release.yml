@@ -1,0 +1,41 @@
+name: Release cpsat-kt
+
+# STUB — wired up later when we publish cpsat-kt to Maven Central.
+# Triggers only on tags like `cpsat-kt-v0.1.0`.
+
+on:
+  push:
+    tags:
+      - "cpsat-kt-v*"
+
+jobs:
+  publish:
+    name: Publish cpsat-kt to Maven Central
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+
+      # TODO(cpsat-kt publish): wire up the signing + Maven Central flow when
+      # we actually cut v0.1.0. Needs:
+      #   - GPG key + passphrase in GH Secrets
+      #     (SIGNING_KEY, SIGNING_PASSWORD)
+      #   - Sonatype / Central Portal credentials in GH Secrets
+      #     (OSSRH_USERNAME, OSSRH_PASSWORD)
+      #   - `./gradlew :libs:cpsat-kt:publishToMavenCentral --no-configuration-cache`
+      #     (or the equivalent under the Gradle Nexus Publish plugin)
+      #   - Release notes auto-generated from the tag message.
+      - name: Placeholder publish step
+        working-directory: libs/cpsat-kt
+        run: |
+          echo "TODO: run ./gradlew publishToMavenCentral once credentials are wired up"
+          echo "Tag: ${GITHUB_REF_NAME}"

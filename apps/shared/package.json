@@ -1,0 +1,23 @@
+{
+  "name": "@cp-deep-dive/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared API contract (OpenAPI 3.1) + JSON schemas for the cp-deep-dive NSP app.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "files": [
+    "openapi.yaml",
+    "schemas/**"
+  ],
+  "scripts": {
+    "validate": "npm run validate:openapi && npm run validate:schemas",
+    "validate:openapi": "swagger-cli validate openapi.yaml",
+    "validate:schemas": "node scripts/validate-schemas.mjs"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-cli": "^4.0.4",
+    "@apidevtools/swagger-parser": "^10.1.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

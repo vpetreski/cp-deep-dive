@@ -1,10 +1,10 @@
 # cp-deep-dive — Learning & Execution Plan
 
-**Version:** v0.2 (draft — answers folded in, awaiting green-light)
+**Version:** v0.2 (locked — full scaffold complete, Chapter 1 open)
 **Last updated:** 2026-04-19
 **Owner:** Vanja (student) + Claude (teacher/pair)
 
-This is the living roadmap. Vanja iterates with Claude on this file, locks it, and only then does Claude scaffold the full repo (all chapters, `libs/cpsat-kt/`, `specs/nsp-app/`, app stubs). Once scaffolded, Vanja opens [`../README.md`](../README.md) and works chapter-by-chapter with Claude monitoring progress.
+This is the living roadmap. The repo is fully scaffolded: `libs/cpsat-kt/` v0.1.0 (41/41 tests green), all 18 chapter MDs under `docs/chapters/`, Python + Kotlin + Web apps in `apps/`, `specs/nsp-app/` skeleton (unlocked, fills in Ch. 14), 4 ADRs, CI, and NSP toy data. **Chapter 1 is open — start at [`chapters/01-what-is-cp.md`](chapters/01-what-is-cp.md).** Mark chapters done here as you complete them.
 
 ---
 
@@ -541,19 +541,29 @@ cp-deep-dive/
 
 ---
 
-## 8. What's already in the repo (Phase 0 ✅)
+## 8. What's already in the repo (Phase 0 + 0.5 ✅)
 
 - Repo skeleton + `CLAUDE.md` + README + AGENTS + `.gitignore`
 - `.mcp.json` with QMD HTTP at `localhost:8181`
 - `.claude/memory/` symlink plumbing + 6 memory files
 - QMD collection `cp-deep-dive-docs` indexed on `docs/`
 - 7 knowledge docs under `docs/knowledge/`: cp-theory, cp-sat (overview + python-vs-kotlin), cpsat-kt (design doc), minizinc, nurse-scheduling, ecosystem
-- This plan (v0.2)
+- **`libs/cpsat-kt/` v0.1.0** — full DSL (10 Kotlin source files) + 41/41 tests passing + README/CHANGELOG/LICENSE
+- **All 18 chapter MDs** (`docs/chapters/01-*.md` … `18-*.md`) — teaching-ladder structure
+- **`apps/py-cp-sat/`** uv workspace (ch02 fully working, ch04–ch13 stubs) + **`apps/py-api/`** FastAPI skeleton
+- **`apps/kt-cp-sat/`** Gradle composite (ch02 raw-Java demo runs) + **`apps/kt-api/`** Ktor 3 skeleton
+- **`apps/web/`** Vite 8 + React 19 + RR7 framework mode + Tailwind 4 + shadcn/ui + TanStack Query 5 (build/test/lint green)
+- **`apps/shared/openapi.yaml`** (OpenAPI 3.1) + JSON schemas validated against 2020-12
+- **`specs/nsp-app/`** 10-file skeleton (unlocked; filled in Chapter 14)
+- **4 ADRs** (`docs/adr/0001`…`0004`) + ADR template
+- **GitHub Actions CI** (`.github/workflows/ci.yml`) — Python + Kotlin + Web parallel jobs
+- **`data/nsp/`** schema + toy-01 (3×7×2) + toy-02 (5×14×3) instances
+- **`tools/validate-schedule.py`** + `tools/setup-all.sh`
+- **`benchmarks/`** folder + README
+- **`apps/alt-solver/`** Timefold + Choco stubs for Phase 8
 
 ---
 
 ## 9. Next step
 
-Vanja reviews this plan and either:
-- Says "**locked, green-light v1.0**" → Claude scaffolds everything in one pass (creates `libs/cpsat-kt/` skeleton, `specs/nsp-app/` skeleton, all chapter starter folders under `apps/`, `docs/chapters/NN-*.md` stubs with full explanations + exercises, CI, `data/nsp/` with toy instance), pushes, then Chapter 1 is ready to open from `README.md`.
-- Or pushes back on any chapter / phase / tooling choice → we iterate to v0.3 and loop.
+**Chapter 1 is open.** Start at [`chapters/01-what-is-cp.md`](chapters/01-what-is-cp.md). Work the chapter end-to-end, mark it done in this plan, move to Chapter 2. Claude tracks progress and maintains docs as you go.

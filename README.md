@@ -30,8 +30,8 @@ Follow these links **in order** on your first pass:
 
 Then, **chapter by chapter from Chapter 1**:
 
-- Open `docs/chapters/01-what-is-cp.md` *(created post-green-light)*
-- Read the chapter, do the exercises in `apps/py-cp-sat/ch01-*/` and `apps/kt-cp-sat/ch01-*/`
+- Open [`docs/chapters/01-what-is-cp.md`](docs/chapters/01-what-is-cp.md)
+- Read the chapter, do the exercises in `apps/py-cp-sat/chNN-*/` and `apps/kt-cp-sat/chNN-*/`
 - Ask Claude when stuck; Claude updates docs/plan as you progress
 - Mark complete in `docs/plan.md`; move to Chapter 2
 
@@ -168,12 +168,19 @@ Full working agreement: [CLAUDE.md](CLAUDE.md).
 - GitHub repo private under `vpetreski/cp-deep-dive`.
 - Memory system primed with user/feedback/project context.
 
-**Phase 0.5 — Plan lock-in: ⏳ In progress**
+**Phase 0.5 — Full scaffold: ✅ Complete**
 
-- [plan.md](docs/plan.md) v0.2 drafted with Vanja's stack choices folded in.
-- Awaiting Vanja's green-light to scaffold the repo (create `libs/cpsat-kt/` skeleton, `specs/nsp-app/`, per-chapter starter apps, CI, etc.).
+- `libs/cpsat-kt/` v0.1.0 library with 41/41 tests passing (`./gradlew test` green).
+- All 18 chapter MDs drafted in `docs/chapters/` with intuition → formal → Python → Kotlin → MiniZinc → exercises structure.
+- Python uv workspace at `apps/py-cp-sat/` (ch02 fully working, ch04–ch13 stubs) + FastAPI skeleton at `apps/py-api/`.
+- Kotlin composite build at `apps/kt-cp-sat/` (ch02 raw-Java demo runs) + Ktor 3 skeleton at `apps/kt-api/`.
+- Web frontend at `apps/web/` (Vite 8 + React 19 + RR7 framework mode + Tailwind 4 + shadcn/ui) — build/test/lint green.
+- `apps/shared/openapi.yaml` (OpenAPI 3.1) + 4 JSON schemas validated against 2020-12.
+- `specs/nsp-app/` 10-file skeleton (unlocked, filled in Chapter 14).
+- 4 ADRs (`docs/adr/`), GitHub Actions CI (Python + Kotlin + Web parallel jobs), `benchmarks/` + `data/nsp/` (toy-01, toy-02 instances + schema).
+- `alt-solver/` Timefold + Choco stubs for Phase 8.
 
-**Phase 1+ — Learning chapters: 🔒 Locked until green-light**
+**Phase 1 — Chapter 1 ready to open:** [`docs/chapters/01-what-is-cp.md`](docs/chapters/01-what-is-cp.md)
 
 ---
 

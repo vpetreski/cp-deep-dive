@@ -1,0 +1,76 @@
+[project]
+name = "py-cp-sat"
+version = "0.1.0"
+description = "Python chapter code for cp-deep-dive — CP-SAT puzzles, scheduling, NSP"
+readme = "README.md"
+requires-python = ">=3.12"
+# The workspace root itself is a virtual project; workspace members carry real deps.
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "hypothesis>=6.115",
+]
+
+[tool.uv.workspace]
+members = [
+    "ch02-hello",
+    "ch04-puzzles",
+    "ch05-optimization",
+    "ch06-globals",
+    "ch09-jobshop",
+    "ch10-shifts",
+    "ch11-nsp-v1",
+    "ch12-nsp-v2",
+    "ch13-nsp-v3",
+]
+
+[tool.uv.sources]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = [".venv", "dist", "build"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # isort
+    "W",   # pycodestyle warnings
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+    "TID", # tidy imports
+]
+ignore = [
+    "E501",  # line-length handled by formatter
+]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+# ortools ships no type stubs for cp_model — silence missing-import on it.
+[[tool.mypy.overrides]]
+module = ["ortools.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+# `importlib` mode stops pytest from turning every `tests/` dir into a package named
+# `tests`, which collides when multiple workspace members each have a `tests/` dir.
+# See https://docs.pytest.org/en/stable/explanation/pythonpath.html#import-modes
+testpaths = [
+    "ch02-hello/tests",
+    "ch04-puzzles/tests",
+    "ch05-optimization/tests",
+    "ch06-globals/tests",
+    "ch09-jobshop/tests",
+    "ch10-shifts/tests",
+    "ch11-nsp-v1/tests",
+    "ch12-nsp-v2/tests",
+    "ch13-nsp-v3/tests",
+]
+addopts = "-ra -q --import-mode=importlib"

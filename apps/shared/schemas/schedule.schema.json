@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cp-deep-dive.dev/schemas/schedule.schema.json",
+  "title": "Schedule",
+  "description": "A candidate roster: one assignment row per (nurseId, day). Absence of a row (or shiftId = null) means the nurse has the day off.",
+  "type": "object",
+  "required": ["instanceId", "assignments"],
+  "additionalProperties": false,
+  "properties": {
+    "instanceId": {
+      "type": "string",
+      "description": "Identifier of the NspInstance this schedule was produced for.",
+      "minLength": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp at which this schedule was produced."
+    },
+    "assignments": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Assignment" }
+    },
+    "violations": {
+      "type": "array",
+      "description": "Soft-constraint violations detected by the validator, if any.",
+      "items": { "$ref": "#/$defs/Violation" }
+    }
+  },
+  "$defs": {
+    "Assignment": {
+      "type": "object",
+      "required": ["nurseId", "day"],
+      "additionalProperties": false,
+      "properties": {
+        "nurseId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "shiftId": {
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "null" }
+          ],
+          "description": "Null (or missing) = day off."
+        }
+      }
+    },
+    "Violation": {
+      "type": "object",
+      "required": ["code", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Stable violation code (e.g. 'HC-1', 'SC-2')."
+        },
+        "message": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["hard", "soft"]
+        },
+        "nurseId": {
+          "type": "string"
+        },
+        "day": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "penalty": {
+          "type": "number"
+        }
+      }
+    }
+  }
+}

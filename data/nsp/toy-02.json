@@ -1,0 +1,80 @@
+{
+  "horizonDays": 14,
+  "shifts": [
+    {"id": "M", "name": "Morning", "start": "07:00", "end": "15:00"},
+    {"id": "D", "name": "Day",     "start": "15:00", "end": "23:00"},
+    {"id": "N", "name": "Night",   "start": "23:00", "end": "07:00"}
+  ],
+  "nurses": [
+    {"id": "N1", "name": "Alice",  "skills": ["general"],                      "contractHoursPerWeek": 36},
+    {"id": "N2", "name": "Bob",    "skills": ["general", "icu"],               "contractHoursPerWeek": 36},
+    {"id": "N3", "name": "Carmen", "skills": ["general", "pedi"],              "contractHoursPerWeek": 36},
+    {"id": "N4", "name": "Diego",  "skills": ["general"],                      "contractHoursPerWeek": 30},
+    {"id": "N5", "name": "Elif",   "skills": ["general", "icu", "senior"],     "contractHoursPerWeek": 40}
+  ],
+  "demand": [
+    {"day": 0,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 0,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 0,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 1,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 1,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 1,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 2,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 2,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 2,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 3,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 3,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 3,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 4,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 4,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 4,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 5,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 5,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 5,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 6,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 6,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 6,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 7,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 7,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 7,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 8,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 8,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 8,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 9,  "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 9,  "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 9,  "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 10, "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 10, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 10, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 11, "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 11, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 11, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 12, "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 12, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 12, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []},
+    {"day": 13, "shiftId": "M", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 13, "shiftId": "D", "min": 1, "max": 2, "requiredSkills": []},
+    {"day": 13, "shiftId": "N", "min": 1, "max": 1, "requiredSkills": []}
+  ],
+  "forbiddenTransitions": [
+    ["N", "M"],
+    ["N", "D"],
+    ["D", "M"]
+  ],
+  "minRestHours": 11,
+  "maxConsecutiveWorkingDays": 5,
+  "preferences": [
+    {"nurseId": "N1", "day": 5,  "shiftId": null, "weight": 2},
+    {"nurseId": "N1", "day": 6,  "shiftId": null, "weight": 2},
+    {"nurseId": "N1", "day": 12, "shiftId": null, "weight": 2},
+    {"nurseId": "N1", "day": 13, "shiftId": null, "weight": 2},
+    {"nurseId": "N2", "day": 2,  "shiftId": "M",  "weight": 1},
+    {"nurseId": "N3", "day": 4,  "shiftId": "N",  "weight": -5},
+    {"nurseId": "N4", "day": 0,  "shiftId": "M",  "weight": 3},
+    {"nurseId": "N5", "day": 7,  "shiftId": null, "weight": 2}
+  ],
+  "fixedOff": [
+    {"nurseId": "N4", "day": 6},
+    {"nurseId": "N3", "day": 10}
+  ]
+}
