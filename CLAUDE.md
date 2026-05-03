@@ -15,7 +15,7 @@ cp-deep-dive/
 ├── AGENTS.md                  <- pointer to CLAUDE.md
 ├── .claude/
 │   ├── commands/              <- project slash commands (empty for now)
-│   ├── memory/                <- versioned project memory (symlinked via tools/setup-memory-link.sh)
+│   ├── memory/                <- mirror of canonical Claude memory (synced via tools/setup-memory-hook.sh post-commit hook)
 │   └── settings.json          <- shared project settings
 ├── .mcp.json                  <- QMD HTTP MCP (local daemon on :8181)
 ├── .gitignore
@@ -47,7 +47,8 @@ cp-deep-dive/
 │   └── nsp/                   <- NSP instances (toy + NSPLib + INRC-I/II)
 ├── benchmarks/                <- baseline + tuned solver runs
 ├── tools/
-│   ├── setup-memory-link.sh   <- one-time per machine: symlink project memory into repo
+│   ├── setup-memory-hook.sh   <- one-time per machine: install post-commit hook that mirrors canonical Claude memory into .claude/memory for git versioning
+│   ├── setup-memory-link.sh.deprecated  <- old symlink approach, kept one cycle for documentation
 │   └── setup-qmd-hook.sh      <- one-time per machine: install post-commit QMD reindex hook
 └── .github/workflows/         <- CI (Py + Kt lint/test)
 ```
@@ -124,7 +125,7 @@ Fallback: if QMD returns "connection refused", restart the daemon: `launchctl ki
 
 **QMD.** The launchd daemon (`io.qmd.daemon`) runs automatically. The post-commit hook re-indexes. Prefer `mcp__qmd__query` over grep for content searches. Use grep for structural searches (imports, path patterns, filenames).
 
-**Memory.** When Vanja corrects you, save a feedback memory with the *why*. When Vanja validates a non-obvious call, save that too. See the global memory guidance — project memory lives in `.claude/memory/`, symlinked into place.
+**Memory.** When Vanja corrects you, save a feedback memory with the *why*. When Vanja validates a non-obvious call, save that too. Project memory lives at the canonical location `~/.claude/projects/<slug>/memory/` (outside the repo) and is mirrored into `.claude/memory/` in this repo via the post-commit hook (`tools/setup-memory-hook.sh`). Versioned in git, portable across machines, zero permission prompts. The previous symlink trick (`tools/setup-memory-link.sh.deprecated`) was abandoned 2026-05-03 because it triggered permission prompts that `--dangerously-skip-permissions` couldn't bypass.
 
 ## When to pause and ask Vanja
 
