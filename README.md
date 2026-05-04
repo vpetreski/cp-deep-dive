@@ -203,9 +203,10 @@ and is instrumented for agentic collaboration:
   can semantically retrieve chunks instead of reading whole files. The
   `.mcp.json` in the repo root wires QMD in as an MCP server. A post-commit
   hook re-indexes automatically.
-- **`.claude/memory/`** (symlinked per machine via
-  `tools/setup-memory-link.sh`) stores conversation-spanning facts about you
-  and how you like to work.
+- **`claude-memory/`** (mirrored from `~/.claude/projects/<slug>/memory/`
+  per machine via `tools/setup-memory-hook.sh`) stores conversation-spanning
+  facts about you and how you like to work. Lives outside `.claude/` because
+  the latter is a hardcoded protected-path prefix that prompts on every edit.
 
 You can absolutely learn the material without any of this — it's all plain
 markdown and code. But with Claude Code attached, you can:

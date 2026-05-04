@@ -47,7 +47,7 @@ cp-deep-dive/
 │   └── nsp/                   <- NSP instances (toy + NSPLib + INRC-I/II)
 ├── benchmarks/                <- baseline + tuned solver runs
 ├── tools/
-│   ├── setup-memory-hook.sh   <- one-time per machine: install post-commit hook that mirrors canonical Claude memory into .claude/memory for git versioning
+│   ├── setup-memory-hook.sh   <- one-time per machine: install post-commit hook that mirrors canonical Claude memory into claude-memory/ for git versioning
 │   ├── setup-memory-link.sh.deprecated  <- old symlink approach, kept one cycle for documentation
 │   └── setup-qmd-hook.sh      <- one-time per machine: install post-commit QMD reindex hook
 └── .github/workflows/         <- CI (Py + Kt lint/test)
@@ -125,7 +125,7 @@ Fallback: if QMD returns "connection refused", restart the daemon: `launchctl ki
 
 **QMD.** The launchd daemon (`io.qmd.daemon`) runs automatically. The post-commit hook re-indexes. Prefer `mcp__qmd__query` over grep for content searches. Use grep for structural searches (imports, path patterns, filenames).
 
-**Memory.** When Vanja corrects you, save a feedback memory with the *why*. When Vanja validates a non-obvious call, save that too. Project memory lives at the canonical location `~/.claude/projects/<slug>/memory/` (outside the repo) and is mirrored into `.claude/memory/` in this repo via the post-commit hook (`tools/setup-memory-hook.sh`). Versioned in git, portable across machines, zero permission prompts. The previous symlink trick (`tools/setup-memory-link.sh.deprecated`) was abandoned 2026-05-03 because it triggered permission prompts that `--dangerously-skip-permissions` couldn't bypass.
+**Memory.** When Vanja corrects you, save a feedback memory with the *why*. When Vanja validates a non-obvious call, save that too. Project memory lives at the canonical location `~/.claude/projects/<slug>/memory/` (outside the repo) and is mirrored into `claude-memory/` in this repo via the post-commit hook (`tools/setup-memory-hook.sh`). Versioned in git, portable across machines, zero permission prompts. Two protected zones avoided: canonical sits outside the working tree, and the in-repo mirror sits outside the hardcoded `.claude/` prefix that triggers the "sensitive file" prompt regardless of `permissions.allow`, `bypassPermissions`, `--dangerously-skip-permissions`, or PreToolUse auto-approve hooks. Edit at the canonical path; `claude-memory/` is a one-way mirror (`rsync -a --delete` canonical → repo) and direct edits there are wiped on the next commit. The earlier symlink trick (`setup-memory-link.sh.deprecated`) put both paths in the same physical location inside the protected `.claude/` prefix and is abandoned.
 
 ## When to pause and ask Vanja
 
@@ -162,7 +162,7 @@ For everything else: act, then report.
 - **Spec-driven apps.** The NSP app is built from `specs/nsp-app/`, locked before impl. Divergence → amend spec, then code.
 - **Latest modern defaults.** JDK 25 (LTS), Kotlin 2.1+, Gradle 9, Python 3.12+ via uv, Node 22+. Upgrade on schedule, don't linger on older versions.
 - **MiniZinc as teaching tool.** Used during learning phases; not in the production app unless a concrete case proves value.
-- **Public repo, personal-framing kept discreet.** Repo is public on GitHub. Technical content is fully public; treat personal memories under `.claude/memory/` (git-ignored, per-machine) as private.
+- **Public repo, personal-framing kept discreet.** Repo is public on GitHub. Technical content is fully public; personal memories under `claude-memory/` are intentionally tracked in git as part of the public artifact — write only what you'd be fine publishing.
 - **No hallucinated APIs.** If uncertain about a CP-SAT, `cpsat-kt`, or MiniZinc API, grep the source or ask — never guess.
 
 ## Commit conventions

@@ -498,7 +498,7 @@ cp-deep-dive/
 ├── README.md                    <- canonical entry point
 ├── CLAUDE.md
 ├── AGENTS.md
-├── .claude/memory/              <- symlinked
+├── claude-memory/               <- mirror of canonical Claude memory (synced via post-commit hook)
 ├── .mcp.json
 ├── docs/
 │   ├── overview.md
