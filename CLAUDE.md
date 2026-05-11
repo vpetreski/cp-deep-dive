@@ -105,6 +105,14 @@ Rule: **always read `docs/overview.md` and the area's `overview.md` first**, the
 
 Fallback: if QMD returns "connection refused", restart the daemon: `launchctl kickstart -k gui/$(id -u)/io.qmd.daemon`, then retry. The `.git/hooks/post-commit` auto-reindexes; if results look stale, run `qmd update && qmd embed`.
 
+### QMD health — auto-detect + auto-fix
+
+**On session start, check for `~/.qmd-broken`:** `[ -f ~/.qmd-broken ] && cat ~/.qmd-broken`. The file is written by the post-commit hook when a reindex fails (silently — in the background) and auto-cleared on the next successful reindex. If it exists, run `./tools/qmd-doctor.sh`.
+
+The doctor auto-fixes: better-sqlite3 ABI mismatch after Node upgrade (`npm rebuild`), daemon stopped or unresponsive (`launchctl kickstart`), and daemon running on stale in-memory binary that would die on next reboot. Exit 0 = fixed/healthy, 1 = needs human, 2 = qmd not installed.
+
+The post-commit hook now writes the flag + fires a macOS notification on any reindex failure. Silent failure is no longer possible — the original bug was the hook backgrounding everything and never surfacing stack traces. Locked 2026-05-10 after a silent ABI break went unnoticed for weeks.
+
 ## Autonomous behaviors (do without asking)
 
 **Context capture.** When Vanja shares knowledge verbally or pastes a link/article/paper, extract the relevant bits and save them to the right place under `docs/knowledge/<area>/`. Create the area if needed (also create its `overview.md`). Report what you saved after the fact — don't narrate the process.

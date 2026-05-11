@@ -29,10 +29,25 @@ END = "# === END: qmd-reindex ==="
 block = """# === BEGIN: qmd-reindex (managed by tools/setup-qmd-hook.sh) ===
 # QMD auto-reindex after commit. Runs in background so commits stay fast.
 # Updates BM25 index + incrementally refreshes vector embeddings for changed files.
+# On failure (e.g. better-sqlite3 ABI mismatch after Node upgrade): writes
+# ~/.qmd-broken flag + fires a macOS notification. Run tools/qmd-doctor.sh to fix.
 # Logs to /tmp/qmd-update.log
+REPO_DIR="$(git rev-parse --show-toplevel 2>/dev/null)"
 {
-  qmd update 2>&1
-  qmd embed 2>&1
+  if qmd update 2>&1 && qmd embed 2>&1; then
+    # Healthy — clear stale flag if present
+    rm -f "$HOME/.qmd-broken"
+  else
+    # Broken — surface loudly so this NEVER goes silent again
+    {
+      echo "QMD update failed at $(date -Iseconds)"
+      echo "Recovery: $REPO_DIR/tools/qmd-doctor.sh"
+      echo "See /tmp/qmd-update.log for the stack trace"
+    } > "$HOME/.qmd-broken"
+    if command -v osascript >/dev/null 2>&1; then
+      osascript -e 'display notification "QMD reindex failed — run tools/qmd-doctor.sh" with title "QMD Broken" sound name "Basso"' 2>/dev/null || true
+    fi
+  fi
 } >> /tmp/qmd-update.log 2>&1 &
 disown || true
 # === END: qmd-reindex ==="""
