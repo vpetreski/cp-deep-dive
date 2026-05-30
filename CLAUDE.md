@@ -97,6 +97,8 @@ Rules:
 
 For domain questions that span files, prefer `mcp__qmd__query` over reading large files whole.
 
+**🔒 QMD-first is hook-enforced (2026-05-29):** a `PreToolUse` hook (`.claude/hooks/qmd-grep-guard.py`, wired in `.claude/settings.json`) hard-blocks grep/rg/git-grep over `docs/` — attempts are denied with *"use mcp__qmd__query instead."* Intentional; **don't remove it**. Use QMD for knowledge search, `Read` for a known single file, or target a non-knowledge dir explicitly for structural code search. Fails open (never bricks Grep/Bash) + logs blocks to `~/.qmd-grep-audit.log`. Story: blog *The Context Wall* § The Discipline Problem.
+
 - `mcp__qmd__query "CP-SAT lazy clause generation search"` → relevant chunks from `docs/knowledge/cp-sat/*`
 - `mcp__qmd__query "nurse scheduling hard constraints coverage"` → chunks from `docs/knowledge/nurse-scheduling/*`
 - `mcp__qmd__query "MiniZinc global constraint alldifferent"` → chunks from `docs/knowledge/minizinc/*`
