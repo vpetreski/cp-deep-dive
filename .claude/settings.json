@@ -1,3 +1,16 @@
 {
-  "enabledPlugins": {}
+  "enabledPlugins": {},
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR:-/Users/cocoloco/Projects/cp-deep-dive}/.claude/hooks/qmd-grep-guard.py\" docs"
+          }
+        ]
+      }
+    ]
+  }
 }
