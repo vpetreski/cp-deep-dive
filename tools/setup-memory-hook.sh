@@ -36,7 +36,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-HOOK_PATH="$REPO_ROOT/.git/hooks/post-commit"
+HOOK_PATH="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-path hooks/post-commit)"
 
 # Step 1: Strip legacy memory-sync block from post-commit hook (no longer needed).
 if [ -f "$HOOK_PATH" ]; then
@@ -101,3 +101,10 @@ echo "  Symlink:      $REPO_ROOT/.claude/memory -> ../claude-memory/"
 echo "  Behavior: Claude Code writes to .claude/memory; kernel resolves to"
 echo "  claude-memory/; protected-path check sees resolved path outside .claude/;"
 echo "  no sensitive-file prompt fires."
+
+# Refresh declared shared instructions and native discovery; hooks stay global.
+if command -v ai-workspace >/dev/null 2>&1; then
+  ai-workspace sync --root "$REPO_ROOT"
+else
+  echo 'Agent adapters: install ai-workspace, then run ai-workspace sync and ai-workspace check in this repository.' >&2
+fi

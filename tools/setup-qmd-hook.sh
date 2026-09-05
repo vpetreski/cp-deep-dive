@@ -10,7 +10,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-HOOK_PATH="$REPO_ROOT/.git/hooks/post-commit"
+HOOK_PATH="$(git -C "$REPO_ROOT" rev-parse --path-format=absolute --git-path hooks/post-commit)"
 
 if ! command -v qmd >/dev/null 2>&1; then
   echo "ERROR: qmd not found in PATH. Install first: npm install -g @tobilu/qmd"
@@ -98,3 +98,10 @@ PY
 echo ""
 echo "  Auto-reindex will run after every commit (in background)."
 echo "  Logs: /tmp/qmd-update.log"
+
+# Refresh declared shared instructions and native discovery; hooks stay global.
+if command -v ai-workspace >/dev/null 2>&1; then
+  ai-workspace sync --root "$REPO_ROOT"
+else
+  echo 'Agent adapters: install ai-workspace, then run ai-workspace sync and ai-workspace check in this repository.' >&2
+fi
