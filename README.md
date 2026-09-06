@@ -202,7 +202,7 @@ and is instrumented for agentic collaboration:
 - **[QMD](https://github.com/tobi/qmd)** indexes `docs/knowledge/` so Claude
   can semantically retrieve chunks instead of reading whole files. The
   `.mcp.json` in the repo root wires QMD in as an MCP server. A post-commit
-  hook re-indexes automatically.
+  hook queues maintenance through the shared `ai-qmd` coordinator.
 - **`claude-memory/`** (mirrored from `~/.claude/projects/<slug>/memory/`
   per machine via `tools/setup-memory-hook.sh`) stores conversation-spanning
   facts about you and how you like to work. Lives outside `.claude/` because
@@ -221,9 +221,10 @@ Per-machine setup if you want the full experience:
 
 ```bash
 ./tools/setup-memory-link.sh     # once per machine
+# Requires ai-qmd from the personal dotfiles installation on PATH.
 ./tools/setup-qmd-hook.sh        # once per machine
 qmd collection add docs --name cp-deep-dive-docs
-qmd update && qmd embed
+ai-qmd request --root "$PWD" --wait
 ```
 
 ## Repo layout

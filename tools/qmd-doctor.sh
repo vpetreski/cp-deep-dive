@@ -9,7 +9,7 @@
 # Auto-fixes:
 #   - npm rebuild better-sqlite3 in the qmd install dir (fixes ABI mismatch)
 #   - launchctl kickstart the daemon (forces it onto the freshly-built binary)
-#   - Removes ~/.qmd-broken flag once green
+#   - Clears native health flag only when CLI/daemon AND the shared maintenance queue are healthy
 #
 # Exit codes:
 #   0 — healthy (was healthy or fixed successfully)
@@ -151,7 +151,20 @@ fi
 
 # --- step 3: write/clear flag file ---
 if [[ $CLI_OK -eq 1 && $DAEMON_OK -eq 1 && $DAEMON_STALE -eq 0 ]]; then
-  if [[ -f "$FLAG_FILE" ]]; then
+  # Native health does not prove that queued source generations were indexed/embedded.
+  if command -v ai-qmd >/dev/null 2>&1; then
+    if ! QUEUE_STATUS="$(ai-qmd status --json 2>/dev/null)"; then
+      err "Native health passed, but QMD maintenance state is unavailable; preserve its failure marker."
+      exit 1
+    fi
+    if ! printf '%s' "$QUEUE_STATUS" | python3 -c 'import json,sys; s=json.load(sys.stdin); sys.exit(0 if not s.get("failure") and s.get("pending_roots")==0 else 1)'; then
+      log "Native CLI/daemon healthy; maintenance is pending or failed."
+      REPAIR_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+      log "Recovery: ai-qmd request --root \"$REPAIR_ROOT\" --wait"
+      exit 1
+    fi
+  fi
+  if [[ $CHECK_ONLY -eq 0 && -f "$FLAG_FILE" ]]; then
     rm -f "$FLAG_FILE"
     log "Removed flag $FLAG_FILE."
   fi

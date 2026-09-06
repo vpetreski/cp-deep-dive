@@ -117,15 +117,15 @@ For domain questions that span files, prefer `mcp__qmd__query` over reading larg
 
 Rule: **always read `docs/overview.md` and the area's `overview.md` first**, then use QMD for depth. Don't read 500+-line knowledge files whole.
 
-Fallback: if QMD returns "connection refused", restart the daemon: `launchctl kickstart -k gui/$(id -u)/io.qmd.daemon`, then retry. The `.git/hooks/post-commit` auto-reindexes; if results look stale, run `qmd update && qmd embed`.
+Fallback: if QMD returns "connection refused", restart the daemon: `launchctl kickstart -k gui/$(id -u)/io.qmd.daemon`, then retry. The Git post-commit hook queues shared maintenance; if results look stale, run `ai-qmd request --root "$PWD" --wait`.
 
 ### QMD health — auto-detect + auto-fix
 
-**On session start, check for `~/.qmd-broken`:** `[ -f ~/.qmd-broken ] && cat ~/.qmd-broken`. The file is written by the post-commit hook when a reindex fails (silently — in the background) and auto-cleared on the next successful reindex. If it exists, run `./tools/qmd-doctor.sh`.
+**On session start, check for `~/.qmd-broken`:** `[ -f ~/.qmd-broken ] && cat ~/.qmd-broken`. The shared ai-qmd updater records maintenance failures durably and creates this marker when no other failure owns it; a successful queued update clears only its unchanged owned marker. Inspect `ai-qmd status --json` for pending generations. If it exists, run `./tools/qmd-doctor.sh`.
 
 The doctor auto-fixes: better-sqlite3 ABI mismatch after Node upgrade (`npm rebuild`), daemon stopped or unresponsive (`launchctl kickstart`), and daemon running on stale in-memory binary that would die on next reboot. Exit 0 = fixed/healthy, 1 = needs human, 2 = qmd not installed.
 
-The post-commit hook now writes the flag + fires a macOS notification on any reindex failure. Silent failure is no longer possible — the original bug was the hook backgrounding everything and never surfacing stack traces. Locked 2026-05-10 after a silent ABI break went unnoticed for weeks.
+The post-commit hook now persists a source-generation request and returns quickly. A shared locked updater coalesces requests and runs native update then embed. Failures stay in private `~/.local/state/ai-workspace/qmd/{failure.json,native.log}` and retry on the next ordinary request. No new daemon or model timer exists. The historical per-hook updater/notification mechanism is superseded; no notification does not prove freshness.
 
 ## Autonomous behaviors (do without asking)
 
@@ -145,7 +145,7 @@ The post-commit hook now writes the flag + fires a macOS notification on any rei
 
 **Git.** Commit after every meaningful change. `<area>: <action>` format (`cp-sat: add chapter on IntVar and linear constraints`, `nurse-scheduling: document HC-1..HC-5`, `docs: update plan after chapter 2`). Push to `origin/main` immediately unless told to batch. One logical change = one commit. Never skip hooks, never force-push, never amend published commits.
 
-**QMD.** The launchd daemon (`io.qmd.daemon`) runs automatically. The post-commit hook re-indexes. Prefer `mcp__qmd__query` over grep for content searches. Use grep for structural searches (imports, path patterns, filenames).
+**QMD.** The launchd daemon (`io.qmd.daemon`) runs automatically. The post-commit hook queues shared maintenance. Prefer `mcp__qmd__query` over grep for content searches. Use grep for structural searches (imports, path patterns, filenames).
 
 **Memory.** When Vanja corrects you, save a feedback memory with the *why*. When Vanja validates a non-obvious call, save that too. Real storage lives at `<repo>/claude-memory/` (tracked in git, portable across machines). `<repo>/.claude/memory` is a symlink to `../claude-memory/`. `tools/setup-memory-hook.sh` is idempotent and creates the symlink on each fresh clone. Zero permission prompts on memory writes. The reverse-symlink architecture (3rd iteration, 2026-05-04) intercepts the write at the kernel level: Claude Code's hardcoded `<cwd>/.claude/memory/` write resolves through the symlink to `claude-memory/` BEFORE the protected-path check sees it (the check is unbypassable from any setting per GitHub issues #41615 + #43001). No post-commit hook needed — git tracks `claude-memory/` directly.
 

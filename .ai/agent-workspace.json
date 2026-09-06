@@ -10,7 +10,8 @@
     ".codex/config.toml",
     "claude-memory/MEMORY.md",
     "tools/setup-memory-hook.sh",
-    "tools/setup-qmd-hook.sh"
+    "tools/setup-qmd-hook.sh",
+    "tools/qmd-doctor.sh"
   ],
   "model_files": [],
   "vendor_specific": {
