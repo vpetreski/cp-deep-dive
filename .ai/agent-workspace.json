@@ -16,12 +16,13 @@
   "model_files": [],
   "vendor_specific": {
     "plugins": "Provider-managed plugin installations and account connectors retain their native runtime; this manifest does not copy credentials or imply cross-provider availability.",
-    "memory": "claude-memory is the shared tracked store; Claude auto-memory resolves through .claude/memory, while Codex explicitly reads/writes the shared index under project instructions."
+    "memory": "claude-memory is the shared tracked store; Claude auto-memory resolves through .claude/memory, while Codex and Grok explicitly read and write the shared index under project instructions."
   },
   "qmd": {
     "script": ".claude/hooks/qmd-grep-guard.py",
     "roots": [
       "docs"
-    ]
+    ],
+    "cwd_aware": true
   }
 }

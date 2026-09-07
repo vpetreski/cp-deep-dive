@@ -1,6 +1,6 @@
 # cp-deep-dive — maintainer's shared agent instructions
 
-> **Reader note (if you're not the maintainer):** this is the maintainer's personal working agreement with Claude Code and Codex for this repo. It is tuned to their learning style, tooling choices, and collaboration preferences. You are welcome to read it for context, fork it, or adapt it — but treat it as one person's setup, not a generic "how to use this repo" doc. The canonical learner-facing entry point is [`README.md`](README.md), and the locked plan is [`docs/plan.md`](docs/plan.md).
+> **Reader note (if you're not the maintainer):** this is the maintainer's personal working agreement with Claude Code, Codex and Grok for this repo. It is tuned to their learning style, tooling choices, and collaboration preferences. You are welcome to read it for context, fork it, or adapt it — but treat it as one person's setup, not a generic "how to use this repo" doc. The canonical learner-facing entry point is [`README.md`](README.md), and the locked plan is [`docs/plan.md`](docs/plan.md).
 
 This repo is a structured, long-form learning project where the maintainer becomes a practitioner of Constraint Programming / Constraint Optimization. The running use case is the **Nurse Scheduling Problem (NSP)** solved with **Google OR-Tools CP-SAT** in both **Python** and **Kotlin** (via our own idiomatic DSL `cpsat-kt`), with **MiniZinc** as a solver-agnostic modeling companion during learning. The capstone is a full end-to-end NSP app: FastAPI + Ktor 3 twin backends, Vite + React 19 + React Router v7 frontend, built from a locked-in markdown spec.
 
@@ -8,15 +8,21 @@ This file is always loaded. Read it first. Deep knowledge lives under `docs/know
 
 ## Shared agent workspace
 
-`CLAUDE.md` is canonical; Codex reads it through `AGENTS.md`. Both runtimes
+`CLAUDE.md` is canonical; Codex/Grok read it through `AGENTS.md`. All three runtimes
 read `claude-memory/MEMORY.md` when starting project work and store durable
 project corrections in that shared directory, preserving its index.
 When changing agent instructions, skills, hooks, MCP, wrappers, or generators,
 update the owning source and `.ai/agent-workspace.json`, then run
 `ai-workspace sync` and `ai-workspace check`. Use native provider controls and
 keep intentional capability differences explicit.
-Global native hooks use the manifest to reuse the QMD guard for Codex; retain
-Claude's existing guard.
+Global native hooks use the manifest to reuse the QMD guard for Codex and Grok; retain
+Claude's existing guard. Grok discovers compatible project instructions/MCP and uses native
+`.grok/skills` adapters when commands exist. Imported Claude hooks stay disabled; the global
+Grok hook adapter normalizes native events to the shared policy.
+All three inherit the global maximum model/effort and unattended permission defaults, scoped
+source-graph procedure, independent-review availability policy and private effectiveness ledger.
+Use the shared `ai-workspace report` procedure during ordinary work; native capability differences
+remain explicit and no project creates another memory store.
 
 ## Structure
 
@@ -27,7 +33,7 @@ cp-deep-dive/
 ├── AGENTS.md                  <- pointer to CLAUDE.md
 ├── .claude/
 │   ├── commands/              <- project slash commands (empty for now)
-│   ├── memory/                <- symlink to tracked claude-memory/ shared by both agents
+│   ├── memory/                <- symlink to tracked claude-memory/ shared by all three agents
 │   └── settings.json          <- shared project settings
 ├── .mcp.json                  <- QMD HTTP MCP (local daemon on :8181)
 ├── .gitignore

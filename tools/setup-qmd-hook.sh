@@ -20,7 +20,7 @@ fi
 mkdir -p "$(dirname "$HOOK_PATH")"
 
 python3 - "$HOOK_PATH" <<'PY'
-import os, sys, pathlib, re
+import os, re, sys, pathlib
 
 hook_path = pathlib.Path(sys.argv[1])
 BEGIN = "# === BEGIN: qmd-reindex (managed by tools/setup-qmd-hook.sh) ==="
@@ -41,34 +41,144 @@ if hook_path.exists():
 else:
     existing = "#!/bin/bash\n"
 
-# A malformed existing managed block is unavailable, never permission to drop its tail.
-for begin, end in [(BEGIN, END)]:
-    if existing.count(begin) != existing.count(end) or existing.count(begin) > 1:
-        raise SystemExit("Malformed managed hook markers; preserve and repair the existing hook first")
-    if begin in existing and existing.index(begin) > existing.index(end):
-        raise SystemExit("Reversed managed hook markers; preserve the existing hook")
+# Validate and remove with the same whole-line parser. Quoted marker text is ordinary
+# shell content, not a boundary, and so is a whole-line marker inside a heredoc body or
+# an open multi-line quote; blocks must be unique, paired and nonoverlapping.
+# Complete validation before writing anything, so malformed blocks preserve the hook.
+# Split on newline sequences only; other Unicode line separators inside a line are content.
+lines = re.split(r"\r\n|\r|\n", existing)
+def shell_contexts(lines):
+    """Pair each line with whether it starts inside a context that continues across lines.
 
-# Strip any previous qmd-reindex block (between markers)
-lines = existing.splitlines(keepends=False)
-cleaned, skip = [], False
-for ln in lines:
-    if ln.strip() == BEGIN:
-        skip = True
+    Tracked forms: heredoc bodies opened at command level (<<WORD, quoted or escaped
+    words, <<- with tab-stripped terminators, several on one line), single, double
+    and ANSI-C ($'...') quotes, $(...) and backtick substitutions including quotes
+    opened inside them, and a backslash line continuation. A whole line equal to a
+    managed marker in such a context is ordinary content; rewriting around it would
+    delete unrelated text. This is not a shell parser: an unbalanced parenthesis
+    inside a substitution or other untracked grammar can misjudge later lines in
+    either direction, so keep hooks simple; a wrong "nested" verdict only preserves
+    the hook for manual review. Known safe-direction over-rejections: "<<" inside
+    arithmetic such as $(( x << 2 )) is read as a heredoc opener, and a backslash
+    continuation on a heredoc opener line also marks the first line after the
+    body as continued.
+    """
+    pending, active, stack, continued = [], None, [], False
+    for ln in lines:
+        if active is not None:
+            yield ln, True
+            word, strip_tabs = active
+            if (ln.lstrip("\t") if strip_tabs else ln) == word:
+                active = pending.pop(0) if pending else None
+            continue
+        yield ln, bool(stack) or continued
+        continued = False
+        i = 0
+        while i < len(ln):
+            ch = ln[i]
+            top = stack[-1] if stack else None
+            if top == "'":
+                if ch == "'":
+                    stack.pop()
+            elif top == "$'":
+                if ch == "\\":
+                    i += 1
+                elif ch == "'":
+                    stack.pop()
+            elif top == '"':
+                if ch == "\\":
+                    continued = i == len(ln) - 1
+                    i += 1
+                elif ch == '"':
+                    stack.pop()
+                elif ln.startswith("$(", i):
+                    stack.append("(")
+                    i += 1
+                elif ch == "`":
+                    stack.append("`")
+            else:  # command level, inside $(...) or inside backticks
+                if ch == "\\":
+                    continued = i == len(ln) - 1
+                    i += 1
+                elif ln.startswith("$'", i):
+                    stack.append("$'")
+                    i += 1
+                elif ch == "'":
+                    stack.append("'")
+                elif ch == '"':
+                    stack.append('"')
+                elif ln.startswith("$(", i):
+                    stack.append("(")
+                    i += 1
+                elif ch == ")" and top == "(":
+                    stack.pop()
+                elif ch == "`":
+                    if top == "`":
+                        stack.pop()
+                    else:
+                        stack.append("`")
+                elif ch == "#" and (i == 0 or ln[i - 1] in " \t;&|()"):
+                    break
+                elif ln.startswith("<<", i) and not ln.startswith("<<<", i) and (i == 0 or ln[i - 1] != "<"):
+                    opener = re.match(r"<<(-?)\s*(?:'([^']*)'|\"([^\"]*)\"|([^\s;&|<>()]+))", ln[i:])
+                    if opener:
+                        # A quoted word is literal; bash removes backslashes only from a bare word.
+                        word = opener.group(4).replace("\\", "") if opener.group(4) is not None else (
+                            opener.group(2) if opener.group(2) is not None else opener.group(3))
+                        pending.append((word, opener.group(1) == "-"))
+                        i += opener.end() - 1
+            i += 1
+        if pending:
+            active = pending.pop(0)
+
+begins = {BEGIN: END}
+ends = set(begins.values())
+cleaned, seen, active_end = [], set(), None
+for ln, nested in shell_contexts(lines):
+    marker = ln.strip()
+    if nested and (marker in begins or marker in ends):
+        raise SystemExit("Managed hook markers inside quoted or heredoc content; preserve and repair the existing hook first")
+    if marker in begins:
+        if active_end is not None or marker in seen:
+            raise SystemExit("Malformed managed hook markers; preserve and repair the existing hook first")
+        seen.add(marker)
+        active_end = begins[marker]
         continue
-    if ln.strip() == END:
-        skip = False
+    if marker in ends:
+        if marker != active_end:
+            raise SystemExit("Malformed managed hook markers; preserve and repair the existing hook first")
+        active_end = None
         continue
-    if not skip:
+    if active_end is None:
         cleaned.append(ln)
+if active_end is not None:
+    raise SystemExit("Malformed managed hook markers; preserve and repair the existing hook first")
 
-# Also strip any LEGACY pre-marker QMD content (from before block markers existed)
-text = "\n".join(cleaned)
-legacy_pattern = re.compile(
-    r"\n*# QMD auto-reindex after commit\..*?disown \|\| true\n?",
-    re.DOTALL
-)
-text = legacy_pattern.sub("\n", text)
-cleaned = text.splitlines()
+# Migrate only the complete original block (Life commit 68dcbbed), at top level
+# after a comment/blank preamble. Matching endpoints alone could swallow custom
+# commands; matching the body inside a quote/heredoc would corrupt unrelated text.
+legacy_qmd = """# QMD auto-reindex after commit. Runs in background so commits stay fast.
+# Updates BM25 index + incrementally refreshes vector embeddings for changed files.
+# Logs to /tmp/qmd-update.log
+
+{
+  qmd update 2>&1
+  qmd embed 2>&1
+} >> /tmp/qmd-update.log 2>&1 &
+disown || true""".splitlines()
+legacy_starts = [i for i, line in enumerate(cleaned)
+                 if "QMD auto-reindex after commit." in line]
+if legacy_starts:
+    start = legacy_starts[0]
+    preamble_only = all(not line.strip() or line.lstrip().startswith("#")
+                        for line in cleaned[:start])
+    if (len(legacy_starts) != 1 or not preamble_only
+            or cleaned[start:start + len(legacy_qmd)] != legacy_qmd):
+        raise SystemExit("Ambiguous legacy QMD hook content; preserve and review the existing hook first")
+    cleaned = cleaned[:start] + cleaned[start + len(legacy_qmd):]
+
+while cleaned and not cleaned[-1].strip():
+    cleaned.pop()
 
 # Ensure shebang
 if not cleaned or not cleaned[0].startswith("#!"):
